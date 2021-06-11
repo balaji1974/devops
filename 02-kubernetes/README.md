@@ -126,13 +126,4 @@ env:
               name: game-demo          # The ConfigMap this value comes from.
               key: player_initial_lives
 
- 
-
-Infrastructure as code: 
-Create Template -> Provision Server -> Install software -> Configure Software -> Deploy App 
-
-Provisioning server can be done by AWS Cloudformation or Terraform
-Install software/Configure Software (both are configuration management) and can be done by Chef, Ansible or puppet. 
-Deploy App can be done with Jenkins or Azure DevOps.
-
 ```
