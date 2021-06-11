@@ -6,13 +6,13 @@
 	Quick Feedback
 
 ## Agile -> 
-  Involves business teams and development teams. 
-  Quick Feedback. 
-  Continuous Integration.   
+  Involves business teams and development teams   
+  Quick Feedback.   
+  Continuous Integration   
 
 ## Microservices -> 
-As they evolved Operations team had a big role to play. 
-DevOps evolved  
+As they evolved Operations team had a big role to play.   
+DevOps evolved.   
 
 ## DevOps -> 
   Enhance communication between Development & Operations teams. 
