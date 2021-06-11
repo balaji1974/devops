@@ -1,6 +1,6 @@
 # Docker
 
-```xml
+<one>
 Features: Standardised application packaging, multi-platform support, light-weight and isolation 
 
 docker run -p 5000:8080 balaji1974/hello-world-java:0.0.1-RELEASE 
@@ -134,6 +134,6 @@ docker-compose top -> List down the top process in each of the containers
 docker build -t balaji1974/hello-world-java:0.0.1.RELEASE . -> Build an image from a Dockerfile
 docker push balaji1974/hello-world-java:0.0.1.RELEASE -> Push an image or a repository to a registry
 
-```
+</one>
 
 
