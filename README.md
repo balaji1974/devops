@@ -27,3 +27,7 @@ Create Template -> Provision Server -> Install software -> Configure Software ->
 Provisioning server can be done by AWS Cloudformation or Terraform    
 Install software/Configure Software (both are configuration management) and can be done by Chef, Ansible or puppet.     
 Deploy App can be done with Jenkins or Azure DevOps.    
+
+
+### References:
+https://www.udemy.com/course/devops-with-docker-kubernetes-and-azure-devops
