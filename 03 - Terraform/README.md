@@ -3,7 +3,7 @@
 ```xml
 Create a group with AdministratorAccess policy and assign this group to a user with AWS access type Programmatic Access and AWS Management Console Access (real scenario will be a more restricted access). 
 
-An Access Key ID &  Secret access key is created with the user which has to be stored safely. 
+An Access Key ID and  Secret access key is created with the user which has to be stored safely. 
 
 Download terraform and install it on the PC and make this available from anywhere by adding it to the path variable. 
 
@@ -229,7 +229,7 @@ resource "aws_security_group" "http_server_sg" {
 
 }
 
-Next create a default key-pair in “aws / ec2 / network & security / key pairs” and get it downloaded. Change permission by setting chmod 400 for this file and move it to a secure location on your PC. This will be used to create the EC2 instances. 
+Next create a default key-pair in “aws / ec2 / network and security / key pairs” and get it downloaded. Change permission by setting chmod 400 for this file and move it to a secure location on your PC. This will be used to create the EC2 instances. 
 
 Now Create a new EC2 instance: 
 resource "aws_instance" "my_ec2_http_server" {
