@@ -20,6 +20,13 @@ DevOps evolved.
   Continuous Delivery (deploy software into production continuously).     
   Infrastructure as Code.  
 
+Continuous Development: Git, SVN, Mercurial, CVS, Jira   
+Continuous Integration: Jenkins, Bamboo, Hudson    
+Continuous Delivery: Nexus, Archiva, Tomcat   
+Continuous Deployment: Puppet, Chef, Docker   
+Continuous Monitoring: Splunk, ELK Stack, Nagios     
+Continuous Testing: Selenium, Katalon Studio   
+
 
 ## Infrastructure as code:   
 Create Template -> Provision Server -> Install software -> Configure Software -> Deploy App    
