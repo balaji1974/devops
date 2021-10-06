@@ -139,13 +139,18 @@ docker push balaji1974/hello-world-java:0.0.1.RELEASE -> Push an image or a repo
 ## Useful Tips
 
 ```xml
-How to install tools like vi editor in docker container? 
+1. How to install tools like vi editor in docker container? 
 
 Login into the container using the following command
 docker exec -it <container> bash
 
 apt-get update
 apt-get install vim
+
+2. Exporting and importing files from/to docker containers:
+Eg. 
+docker cp mysql:/etc/my.cnf . - Import the file from docker to the local folder where container name is 'mysql'
+docker cp my.cnf mysql:/etc/my.cnf - Export it back to the container named 'mysql'
 
 ```xml
 
