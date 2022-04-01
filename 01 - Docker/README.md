@@ -117,7 +117,41 @@ ENTRYPOINT ["sh", "-c", "java -jar /hello-world-java.jar"] -> set the entry poin
 docker run -d -p 5002:5000 balaji1974/hello-world-java:0.0.2.RELEASE -> run the docker image that was built 
 docker push balaji1974/hello-world-java:0.0.2.RELEASE -> Push the docker image to the docker container
 
+# Another way to do this is:
+FROM java:11
+WORKDIR /
+ADD hello-world-java.jar hello-world-java.jar
+EXPOSE 8080
+CMD java - jar hello-world-java.jar
+
+save the above as a docket file with the name 'Dockerfile'
+
+then run the following command:
+docker build -t helloworld
+
 ```
+
+## Command to pull and push docker image to docket hub: 
+
+```xml
+Create an account on dockerhub and create the repository "hello-world-java" to push your image to your repository. Once you register and create a repository, go to command line and log in there with docker login.
+
+Then pull that repository: docker pull /hello-world-java  
+To push your Docker image to DockerHub you need to figure out your Docker_Image_ID. 
+To do that run the following: 
+docker images  
+
+So you may find your image and see you Image_Id. Now you need to tag and push your image:  
+docker tag 4b795844c7ab /hello-world-java
+
+Now you are ready to upload your Docker Image to DockerHub.
+Just type: docker push /hello-world-java:latest 
+
+To check if everything works fine enter: docker run /hello-world-java
+
+```
+
+## Other commands
 
 ```xml
 CMD overrides the docker file with the command line arguments that is being supplied 
@@ -168,3 +202,6 @@ docker cp my.cnf mysql:/etc/my.cnf - Export it back to the container named 'mysq
 
 ```
 
+
+Reference:
+https://dzone.com/articles/run-simple-jar-application-in-docker-container-1
