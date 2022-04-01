@@ -55,9 +55,11 @@ docker container run -p 5000:5000 -d -m 512m --cpu-quota=50000  balaji1974/hello
 docker container stats 4faca1ea914e3e458 -> Display a live stream of container(s) resource usage statistics
 docker stats 42f170966ce613d2a16d7404495 -> Display a live stream of container(s) resource usage statistics
 
+```
 
+## Build & Run a python docker image and push the image to docker hub
 
-Build & Run a python docker image and push the image to docker hub:- 
+```xml
 cd /balaji1974/git/devops-master-class/projects/hello-world/hello-world-python -> Go to the python project folder 
 docker build -t balaji1974/hello-world-python:0.0.2.RELEASE . (the final dot is the build context)  -> Build the docker file 
 
@@ -71,9 +73,12 @@ CMD python ./launch.py -> run the python file
 
 docker run -p 5000:5000 -d balaji1974/hello-world-python:0.0.2.RELEASE -> Run the built docker image 
 docker history e66dc383f7a0 -> Display the full history of what happened with the image
-docker push balaji1974/hello-world-python:0.0.2.RELEASE-> Push the image to the docker hub 
+docker push balaji1974/hello-world-python:0.0.2.RELEASE-> Push the image to the docker hub
+```
 
-Build & Run a node.js docker image and push the image to docker hub:- 
+## Build & Run a node.js docker image and push the image to docker hub
+
+```xml
 cd ../hello-world-nodejs/ -> Go to the node js project folder 
 docker build -t balaji1974/hello-world-nodejs:0.0.2.RELEASE . -> (the final dot is the build context)  -> Build the docker file 
 
@@ -88,8 +93,11 @@ CMD node index.js -> run the node js file
 docker container run -d -p 5001:5000 balaji1974/hello-world-nodejs:0.0.2.RELEASE -> Run the built docker image 
 docker push balaji1974/hello-world-nodejs:0.0.2.RELEASE -> Push the image to the docker hub 
 
+```
 
-Build & Run a java docker image and push the image to docker hub:- 
+## Build & Run a java docker image and push the image to docker hub: 
+
+```xml
 cd ../hello-world-java/ -> Go to the java project folder 
 docker build -t balaji1974/hello-world-java:0.0.2.RELEASE .  -> (the final dot is the build context)  -> Build the docker file 
 
@@ -109,6 +117,9 @@ ENTRYPOINT ["sh", "-c", "java -jar /hello-world-java.jar"] -> set the entry poin
 docker run -d -p 5002:5000 balaji1974/hello-world-java:0.0.2.RELEASE -> run the docker image that was built 
 docker push balaji1974/hello-world-java:0.0.2.RELEASE -> Push the docker image to the docker container
 
+```
+
+```xml
 CMD overrides the docker file with the command line arguments that is being supplied 
 ENTRYPOINT will not have this override function of the CMD unless we use any argument called --entrypoint with our docker run command 
 
@@ -121,6 +132,11 @@ docker network create currency-network -> Create a custom network
 docker run -d -p 8000:8000 --name=currency-exchange --network=currency-network balaji1974/currency-exchange:0.0.1-RELEASE -> Run the container on the custom network 
 docker run -d -p 8100:8100 --env CURRENCY_EXCHANGE_SERVICE_HOST=http://currency-exchange --name=currency-conversion --network=currency-network balaji1974/currency-conversion:0.0.1-RELEASE > Run the container on the custom network 
 
+```
+
+## Docker Compose
+
+```xml
 
 docker-compose --version -> To check the version of docker compose 
 docker-compose up -> Will run the docker-compose.yml file and start the container  
@@ -152,5 +168,5 @@ Eg.
 docker cp mysql:/etc/my.cnf . - Import the file from docker to the local folder where container name is 'mysql'
 docker cp my.cnf mysql:/etc/my.cnf - Export it back to the container named 'mysql'
 
-```xml
+```
 
