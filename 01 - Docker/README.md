@@ -137,7 +137,6 @@ docker run -d -p 8100:8100 --env CURRENCY_EXCHANGE_SERVICE_HOST=http://currency-
 ## Docker Compose
 
 ```xml
-
 docker-compose --version -> To check the version of docker compose 
 docker-compose up -> Will run the docker-compose.yml file and start the container  
 docker-compose up -d -> Will run the docker-compose.yml file and start the container in detached mode 
@@ -149,7 +148,6 @@ docker-compose top -> List down the top process in each of the containers
 
 docker build -t balaji1974/hello-world-java:0.0.1.RELEASE . -> Build an image from a Dockerfile
 docker push balaji1974/hello-world-java:0.0.1.RELEASE -> Push an image or a repository to a registry
-
 
 ```
 ## Useful Tips
