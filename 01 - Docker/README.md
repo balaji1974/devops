@@ -253,12 +253,25 @@ EXPOSE 8080
 ADD target/scheduler-service-0.0.1.jar scheduler-service-0.0.1.jar
 CMD ["java", "-jar", "scheduler-service-0.0.1.jar"]
 
-Next build the docker file by running the below command:
-docker build -t scheduler-service-0.0.1.jar .
+Next build the docker file by running the below command: (where balaji1974 is my docker repo)
+docker build -t balaji1974/scheduler-service:latest -t balaji1974/scheduler-service:v0.0.1 .
+(I have added multiple tags-latest and v0.0.1 to my imaage)
 
 Run the scheduler service with the below command:
-docker container run -p 8080:8080 --name scheduler-service scheduler-service-0.0.1.jar
+docker container run -p 8080:8080 --name scheduler-service balaji1974/scheduler-service:latest
+
+(This will run the image if it is already present or else it will fetch from the docker hub)
 ```
+
+## Push / pull to docker hub: 
+(Note for free account, push/pull works only for public repo or the first 5 private repositories 
+Also push works with docker desktop for private repo but pull does not work) 
+```xml
+docker push balaji1974/scheduler-service:latest
+docker pull balaji1974/scheduler-service:latest
+
+```
+
 
 Reference:
 https://dzone.com/articles/run-simple-jar-application-in-docker-container-1
