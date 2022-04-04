@@ -268,9 +268,19 @@ docker container run -p 8080:8080 --name scheduler-service balaji1974/scheduler-
 Also push works with docker desktop for private repo but pull does not work) 
 ```xml
 docker push balaji1974/scheduler-service:latest
+docker push balaji1974/scheduler-service:v0.0.1
 docker pull balaji1974/scheduler-service:latest
 
 ```
+
+## Docker compose - Microservices Installation and Practical approach 
+```xml
+Docker compose is already part of Docker desktop and so install docker desktop on mac/windows to get it
+
+
+
+```
+
 
 
 Reference:
