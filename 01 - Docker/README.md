@@ -277,7 +277,7 @@ docker pull balaji1974/scheduler-service:latest
 ```xml
 Docker compose is already part of Docker desktop and so install docker desktop on mac/windows to get it
 
-
+Check the docker-compose.yml file
 
 ```
 
