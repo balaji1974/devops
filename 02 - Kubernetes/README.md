@@ -127,3 +127,24 @@ env:
               key: player_initial_lives
 
 ```
+
+## Create and manage Kubernetes cluster on google cloud 
+
+```xml
+1. Create a cluster 
+Search for Kubernetes -> Create -> GKE Standard (later we will see for managed - GKE Autopilot) -> Enter cluster name -> Leave other parameters to default -> Create  
+
+2. Activate Cloud Shell 
+Click on the cluster -> Activate cloud shell -> Open in new window 
+
+3. Connect to the cluster 
+Click on the cluster -> Connect -> Copy and paste the below command on cloud shell open in the previous window
+gcloud container clusters get-credentials <cluster name> --zone <zone> --<project name>
+
+4. Check the kubernetes version
+kubectl version
+
+
+
+
+```
