@@ -281,6 +281,51 @@ Check the docker-compose.yml file
 
 ```
 
+## Creating and running a container from an image 
+```xml
+docker run <image-name> 
+where run command is used to create and run a container 
+
+docker run <image-name> <command>
+where <command> will be run inside the container 
+
+docker run = docker create + docker start 
+ 
+```
+
+# List all running and stopped containers  
+```xml
+docker ps  
+shows all running containers 
+
+docker ps --all
+shows all containers that where ever created
+
+```
+
+# Create a container   
+```xml
+docker create <image-name>   
+creates a docker container  
+
+```
+
+# Start a container   
+```xml
+docker start <container_id>   
+starts a docker container  
+
+```
+
+
+# Remove all stopped containers 
+```xml
+docker system prune 
+this command will remove all stopped containers   
+
+```
+
+
 
 
 Reference:
