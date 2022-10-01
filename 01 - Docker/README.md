@@ -1,5 +1,105 @@
 # Docker
 
+
+# Creating and running a container from an image 
+```xml
+docker run <image-name> 
+where run command is used to create and run a container 
+
+docker run <image-name> <command>
+where <command> will be run inside the container 
+
+docker run = docker create + docker start 
+ 
+```
+
+# List all running and stopped containers  
+```xml
+docker ps  
+shows all running containers 
+
+docker ps --all
+shows all containers that where ever created
+
+```
+
+# Create a container   
+```xml
+docker create <image-name>   
+creates a docker container  
+
+```
+
+# Start a container   
+```xml
+docker start <container_id>   
+starts a docker container  
+
+docker start -a <container_id>   
+starts docker container with output logs to the console, where 'a' stands for attach
+ 
+```
+
+# Remove all stopped containers 
+```xml
+docker system prune 
+this command will remove all stopped containers   
+
+```
+
+# Display logs of a container
+```xml
+docker log <container_id> 
+this command will display the logs of the container    
+
+```
+
+# Stop a running container
+```xml
+docker stop <container_id> 
+this command will stop a running docker container, 
+where a SIGTERM (Terminate Signal) is sent and the container is shutdown gracefully 
+Also, note that if the container does not stop in 10 seconds a docker kill command is issued internally by docker 
+
+```
+
+# Kill a running container
+```xml
+docker kill <container_id> 
+this command will kill a running docker container.
+where a SIGKILL (Kill Signal) is sent and the container is shutdown immediately without waiting for processes to shutdown  
+
+```
+
+# Executing commands inside a running docker container
+```xml
+docker exec -it <container_id> <command>
+
+this command will execute an additional command inside a running docker container.
+where exec is for running another command, and -it allows us to provide input to the container 
+
+Eg. docker exec -it 78965efhe redis-cli 
+
+```
+
+# Getting the shell access to a running docker container
+```xml
+docker exec -it <container_id> sh 
+
+this command will give the shell access to a running docker container.
+
+Eg. docker exec -it 78965efhe sh  
+
+```
+
+
+
+
+
+
+
+
+
 ```xml
 Features: Standardised application packaging, multi-platform support, light-weight and isolation 
 
@@ -281,52 +381,11 @@ Check the docker-compose.yml file
 
 ```
 
-## Creating and running a container from an image 
-```xml
-docker run <image-name> 
-where run command is used to create and run a container 
-
-docker run <image-name> <command>
-where <command> will be run inside the container 
-
-docker run = docker create + docker start 
- 
-```
-
-# List all running and stopped containers  
-```xml
-docker ps  
-shows all running containers 
-
-docker ps --all
-shows all containers that where ever created
-
-```
-
-# Create a container   
-```xml
-docker create <image-name>   
-creates a docker container  
-
-```
-
-# Start a container   
-```xml
-docker start <container_id>   
-starts a docker container  
-
-```
-
-
-# Remove all stopped containers 
-```xml
-docker system prune 
-this command will remove all stopped containers   
-
-```
 
 
 
 
 Reference:
 https://dzone.com/articles/run-simple-jar-application-in-docker-container-1
+https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/
+
