@@ -74,7 +74,6 @@ where a SIGKILL (Kill Signal) is sent and the container is shutdown immediately 
 # Executing commands inside a running docker container
 ```xml
 docker exec -it <container_id> <command>
-
 this command will execute an additional command inside a running docker container.
 where exec is for running another command, and -it allows us to provide input to the container 
 
@@ -85,14 +84,25 @@ Eg. docker exec -it 78965efhe redis-cli
 # Getting the shell access to a running docker container
 ```xml
 docker exec -it <container_id> sh 
-
 this command will give the shell access to a running docker container.
 
 Eg. docker exec -it 78965efhe sh  
 
+docker run -it <container_id> sh 
+this command also gives the shell access to a docker container
+
+Eg. docker run -it 78965efhe sh  
+
 ```
 
+## Note: Multiple docker running containers do not share their file systems 
+## Docker file is a configuration to define how our container should behave
 
+# Creating a redis-image from dockerfile
+```xml
+Check the project in the folder redis-image 
+
+```
 
 
 
