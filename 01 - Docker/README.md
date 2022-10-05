@@ -95,12 +95,26 @@ Eg. docker run -it 78965efhe sh
 
 ```
 
+# Docker Build Process
+## dockerfile -> Docker Client -> Docker Server -> Docker Image
+
 ## Note: Multiple docker running containers do not share their file systems 
 ## Docker file is a configuration to define how our container should behave
+
 
 # Creating a redis-image from dockerfile
 ```xml
 Check the project in the folder redis-image 
+
+After this project is pulled, run the following command to build the docker image from the folder of the Dockerfile 
+docker build -t balaji1974/redis:latest .   
+
+where -t is the tag command and . specifes the directory or the file to build 
+
+To run the image that is build
+docker run <image_id>
+in our case
+
 
 ```
 
@@ -108,7 +122,7 @@ Check the project in the folder redis-image
 
 
 
-
+# General notes 
 
 ```xml
 Features: Standardised application packaging, multi-platform support, light-weight and isolation 
