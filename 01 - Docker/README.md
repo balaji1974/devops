@@ -114,11 +114,26 @@ where -t is the tag command and . specifes the directory or the file to build
 To run the image that is build
 docker run <image_id>
 in our case
-
+docker run balaji1974/redis:latest 
 
 ```
 
+# Reverse engineer a docker container into a docker image
+```xml
+First we can do manually everything that a docker file does and 
+finally create an image from the container
+Eg. 
+docker run -it alpine sh -> This will create a container from the alpine image and run the shell command on this image
 
+apk add --update redis -> Manually install redis inside that container that was created
+
+Next go to another command window and run 
+docker ps -> This will give us the id of the container that was created
+
+docker commit -c 'CMD ["redis-server"]' 9c655a7fd312986 -> This command will give us an id of the new image that was created from the container
+
+
+```
 
 
 
