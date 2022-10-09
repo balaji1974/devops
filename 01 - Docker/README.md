@@ -132,8 +132,78 @@ docker ps -> This will give us the id of the container that was created
 
 docker commit -c 'CMD ["redis-server"]' 9c655a7fd312986 -> This command will give us an id of the new image that was created from the container
 
+```
+
+# Create a nodejs applicaton 
+```xml
+The source code of this project is in the folder nodejs 
+
+Build the project with the following command:
+docker build -t balaji1974/nodejs . 
+
+Run the project with the following command:
+docker run -p 8080:8080 balaji1974/nodejs 
 
 ```
+
+
+# Multi container applications using docker  
+```xml
+The source code of this project is in the folder multicontainer 
+
+Build the project with the following command:
+docker build -t balaji1974/multicontainer:latest .
+
+Run the project with the following command:
+docker run -p 8081:8081 balaji1974/multicontainer 
+
+This command will give an error as we have not yet started the redis container 
+So we need to run the redis container with the following command:
+docker run redis 
+
+Finally run the command from docker-compose:
+docker-compose up --build
+
+```
+
+
+# Docker Compose
+```xml
+It is a seperate CLI that getst installed along with Docker 
+It is used to startup multiple containers at the same time
+Automates some of the long-winding arguments that we were passing to 'docker run'
+
+Putting it all together with docker compose 
+Run the following command: 
+docker-compose up -> is equal to docker run <image-name>
+docker-compose up --build -> is equal to running both docker build . and docker run <image-name>
+
+
+Launch in background
+docker-compose up -d
+
+Stop containers
+docker-compose down
+
+
+```
+
+
+# Docker Restart policies
+```xml
+no -> never attempt to restart this container if it crashes or stops
+always -> always attempt to restart this container if it stops for any reason
+on-failure -> Only restart if the container stops with an error code 
+unless-stopped -> Always restart unless we (developers) forcibly stop it 
+
+
+Status codes -> System.exit(status_code) or process.exit(status_code) etc where status_code is 0 or anything else. 
+if status_code is 0 -> We exited and everything is ok 
+if status_code is 1,2,3 etc -> We exited because something went wrong 
+
+
+```
+
 
 
 
