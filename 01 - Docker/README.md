@@ -178,20 +178,22 @@ Run the following command:
 docker-compose up -> is equal to docker run <image-name>
 docker-compose up --build -> is equal to running both docker build . and docker run <image-name>
 
-
 Launch in background
 docker-compose up -d
 
 Stop containers
 docker-compose down
 
+Show status of running containers in the docker compose file
+docker-compose ps -> This must run from inside the project directory as it needs the docker-compose.yml file to be present 
 
 ```
 
 
 # Docker Restart policies
 ```xml
-no -> never attempt to restart this container if it crashes or stops
+"no" -> never attempt to restart this container if it crashes or stops, specifically use it within quotes 
+	or else yaml file interprets its as a boolean value 
 always -> always attempt to restart this container if it stops for any reason
 on-failure -> Only restart if the container stops with an error code 
 unless-stopped -> Always restart unless we (developers) forcibly stop it 
@@ -201,9 +203,43 @@ Status codes -> System.exit(status_code) or process.exit(status_code) etc where 
 if status_code is 0 -> We exited and everything is ok 
 if status_code is 1,2,3 etc -> We exited because something went wrong 
 
+Eg. check docker-compose.yml file inside multicontainer folder 
 
 ```
 
+# Creating a production grade workflow
+```xml
+Check project inside the frontend folder 
+
+Workflow to be defined: 
+Push to -> Feature branch -> Pull request -> Master Branch -> Travis CI -> AWS Hosting
+
+Install nodejs from https://nodejs.org/en/download/
+Check installed version with command: node -v
+
+Install react using node
+sudo npm install -g create-react-app 
+
+Go to folder frontend and create a react project
+create-react-app frontend 
+
+npm run start -> Starts up a development server
+npm run test -> Runs the test associated with the project
+nprm run build -> Builds a production version of the application 
+
+cd frontend
+npm run test -> We can see our test pass 
+npm run build -> This will create an optimized version of production build 
+npm run start -> This will start the default React application 
+
+
+Building and run project with Dockerfile.dev extension 
+docker build -f Dockerfile.dev .
+docker run -p 3000:3000 <container_id>
+
+
+
+```
 
 
 
