@@ -247,9 +247,18 @@ docker run -p 3000:3000 <container_id>
 Source code changes to be propogated to the docker build automatically 
 Docker volume -> It is a reference to the orginal source code directory in the local folder 
 
-docker run -p 3000:3000 -v /app/node_modules -v $(pwd):/app <image-id> -> where v denotes the volume switch 
+docker run -p 3000:3000 -v /app/node_modules -v "$(pwd)":/app <image-id> -> where v denotes the volume switch 
 Here first -v dentoes a bookmark on the node_modules folder inside the container and do not map this to the local directory 
 and the second -v denotes a map from the present working directory into the /app folder inside the container 
+
+To run the project type the following commands:
+docker build .
+docker run -p 3000:3000 -v /app/node_modules -v "$(pwd)":/app <image-id>
+
+Now after this we have setup a reference of our PC's local folder into the docker container
+and any change inside our project folder will be directly referenced inside the container.
+
+To test this change the App.js content inside the src folder and watch it getting changed inside the container. 
 
 ```
 
