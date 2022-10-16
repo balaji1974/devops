@@ -272,8 +272,6 @@ tests:
       - .:/app
     command: ['npm', 'run', 'test']
 
-
-
 ```
 
 # Docker - Running test  
@@ -287,11 +285,30 @@ and -it is for getting the command promt inside the container to run the test
 docker exec -it <container_id> npm run test -> 
 This will reuse the existing container and will automatically update our test cases like how volume deos 
 
-Best approach is to use docker compose for running the test suite 
-
-
+Best approach is to use docker compose for running the test suite -> check the docker-compose.yml file 
 
 ``
+
+
+# Docker attach 
+```xml
+docker attach <container_id> 
+-> This will attach the stdin, stdout and stderr of the container to our local machine 
+
+```
+
+# Docker Nginx - Used in Production version 
+```xml
+Refer the production folder of the project 
+
+Note the multi-step process inside the Dockerfile
+
+Build the project using: docker build .
+Run the project using: docker run -p 8080:80 <container-id>
+Check the project in the browser using: http://localhost:8080/ 
+
+```
+
 
 
 # General notes 
