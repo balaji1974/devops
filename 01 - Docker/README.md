@@ -260,7 +260,38 @@ and any change inside our project folder will be directly referenced inside the 
 
 To test this change the App.js content inside the src folder and watch it getting changed inside the container. 
 
+Please note With docker compose this command can be run as per the docker-compose.yml file in the same directory.  
+Add the following inside the serivices in the docker file 
+tests:
+    stdin_open: true
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /app/node_modules
+      - .:/app
+    command: ['npm', 'run', 'test']
+
+
+
 ```
+
+# Docker - Running test  
+
+```xml
+docker build . 
+docker run -it <container_id> npm run test -> 
+where npm run test is appended to our dockerfile commands in the last
+and -it is for getting the command promt inside the container to run the test 
+
+docker exec -it <container_id> npm run test -> 
+This will reuse the existing container and will automatically update our test cases like how volume deos 
+
+Best approach is to use docker compose for running the test suite 
+
+
+
+``
 
 
 # General notes 
