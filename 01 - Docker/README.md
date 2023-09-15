@@ -1,10 +1,39 @@
 # Docker
 
+# Installing Docker Desktop
+```xml
+Just follow the page in the below link:
+https://docs.docker.com/engine/install/ 
+
+```
+
+# Docker terms
+```xml
+Container Image: It is a set of instructions to build a Docker container. It is a lightweight, standalone, executable package of software that includes everything needed to run an application: code, runtime, system tools, system libraries and settings
+Container: Container images become containers at runtime and in the case of Docker containers – images become containers when they run on Docker Engine. A running version of an image is called a container. 
+One container image can have a lot of running containers
+
+```
+
+# Why Docker? 
+```xml
+Standardised application packaging -> Same packaging for for all types of applications like Java, Python, JS etc 
+Multi platform support -> Install locally, on a datacenter or cloud (AWS,Azure,GCP etc)
+Lightweight and isolation -> They are light weight and isolated from one another 
+
+```
+
 
 # Creating and running a container from an image 
 ```xml
 docker run <image-name> 
 where run command is used to create and run a container 
+
+Eg. docker run -p 5000:5000 balaji1974/devops/docker/hello-world-0.0.1-RELEASE 
+-p 5000:5000 -> Stands for host-port:container-port
+
+docker run -d -p 5000:5000 balaji1974/devops/docker/hello-world-0.0.1-RELEASE 
+Run the container in detached mode 
 
 docker run <image-name> <command>
 where <command> will be run inside the container 
@@ -37,7 +66,7 @@ starts a docker container
 
 docker start -a <container_id>   
 starts docker container with output logs to the console, where 'a' stands for attach
- 
+
 ```
 
 # Remove all stopped containers 
@@ -70,6 +99,13 @@ this command will kill a running docker container.
 where a SIGKILL (Kill Signal) is sent and the container is shutdown immediately without waiting for processes to shutdown  
 
 ```
+
+# View the logs of a Docker container
+```xml
+docker logs <container_id> 
+
+```
+
 
 # Executing commands inside a running docker container
 ```xml
@@ -344,10 +380,12 @@ docker image history 100229ba687e -> To see history of a image using its tag nam
 
 docker image inspect 100229ba687e -> To see the details of an image using its tag 
 docker image remove mysql -> Remove the docker image 
-docker container stop mysql -> Stop the running container
 
-docker container pause 832 -> To pause a running container
-docker container unpause 832 -> To unpause a running container 
+docker container stop mysql -> Stop the running container (gracefully)
+docker container kill mysql -> Shutdown the running container immediately (not gracefully)
+
+docker container pause <container id> -> To pause a running container
+docker container unpause <container id> -> To unpause a running container 
 
 docker container inspect ff521fa58db3 -> To inspect a container 
 docker container prune -> Remove all stopped containers
@@ -363,7 +401,7 @@ docker top 9009722eac4d -> Display the running processes of a container
 docker stats 9009722eac4d -> Display a live stream of container(s) resource usage statistics
 
 docker container run -p 5000:5000 -d -m 512m balaji1974/hello-world-java:0.0.1.RELEASE -> same as docker run command
-docker container run -p 5000:5000 -d -m 512m --cpu-quota=50000  balaji1974/hello-world-java:0.0.1.RELEASE -> allocate a CPU quota and a memory limit
+docker container run -p 5000:5000 -d -m 512m --cpu-quota=50000  balaji1974/hello-world-java:0.0.1.RELEASE -> allocate a CPU quota (total available CPU quota is 100,000, where we have allocated half of it) and a memory limit
 
 docker container stats 4faca1ea914e3e458 -> Display a live stream of container(s) resource usage statistics
 docker stats 42f170966ce613d2a16d7404495 -> Display a live stream of container(s) resource usage statistics
@@ -374,7 +412,6 @@ docker stats 42f170966ce613d2a16d7404495 -> Display a live stream of container(s
 
 ```xml
 cd /balaji1974/git/devops-master-class/projects/hello-world/hello-world-python -> Go to the python project folder 
-docker build -t balaji1974/hello-world-python:0.0.2.RELEASE . (the final dot is the build context)  -> Build the docker file 
 
 Inspect the docker file content - 
 FROM python:alpine3.10 -> Build from a python lightweight version 
@@ -384,6 +421,7 @@ RUN pip install -r requirements.txt -> Like maven for java pip is for python whi
 EXPOSE 5000 -> Expose the application that was built to the outside world on port 5000
 CMD python ./launch.py -> run the python file 
 
+docker build -t balaji1974/hello-world-python:0.0.2.RELEASE . -> (the final dot is the build context) -> Build the docker image 
 docker run -p 5000:5000 -d balaji1974/hello-world-python:0.0.2.RELEASE -> Run the built docker image 
 docker history e66dc383f7a0 -> Display the full history of what happened with the image
 docker push balaji1974/hello-world-python:0.0.2.RELEASE-> Push the image to the docker hub
@@ -443,7 +481,6 @@ Next to build the docker image run the following command:
 docker build -t helloworld
 
 
-
 ```
 
 ## Command to pull and push docker image to docket hub: 
@@ -466,11 +503,11 @@ To check if everything works fine enter: docker run /hello-world-java
 
 ```
 
-## Other commands
+## Docker custom network for microservices
 
 ```xml
-CMD overrides the docker file with the command line arguments that is being supplied 
-ENTRYPOINT will not have this override function of the CMD unless we use any argument called --entrypoint with our docker run command 
+CMD overrides the docker file CMD line with the command line arguments that is being supplied 
+ENTRYPOINT will not have this override function of the CMD line unless we use any argument called --entrypoint with our docker run command 
 
 docker network ls -> To display the network details of docker
 docker network inspect bridge -> To display the bridge network details. All running containers are part of the bridge network and do not talk to each other. To overcome this we need to start the container with --link parameter and a registered environment variable --env with the microservice url.  Eg. 
@@ -494,6 +531,9 @@ docker-compose config -> Useful for validating the yaml file
 docker-compose images -> List of images used by the docker compose 
 docker-compose ps -> List down the containers 
 docker-compose top -> List down the top process in each of the containers 
+docker-compose pause -> Pause the containers 
+docker-compose unpause -> Unpasue all the paused containers
+docker-compose kill -> Kill all processes of the container  
 
 docker build -t balaji1974/hello-world-java:0.0.1.RELEASE . -> Build an image from a Dockerfile
 docker push balaji1974/hello-world-java:0.0.1.RELEASE -> Push an image or a repository to a registry
@@ -598,7 +638,10 @@ Check the docker-compose.yml file
 
 
 
-Reference:
+## Reference:
+```xml
 https://dzone.com/articles/run-simple-jar-application-in-docker-container-1
 https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/
+https://www.udemy.com/course/devops-with-docker-kubernetes-and-azure-devops/
 
+```

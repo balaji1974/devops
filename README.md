@@ -5,7 +5,7 @@
    Automation.  
    Quick Feedback.  
 
-## Agile -> 
+## Agile -> (Brings business and development teams together and immediate feedback is given at the end of each sprint)
   Involves business teams and development teams   
   Quick Feedback.   
   Continuous Integration.     
