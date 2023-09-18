@@ -18,6 +18,24 @@ GKE (Google Kubernetes Engine)
 Regions- > Scattered across the globe
 Zones- > In a particular region the no. of availability zones that are present 
 
+```
+
+## K8S architecture
+
+```xml
+Containers -> reside inside Pod
+Pods -> sit on Replica Set
+Replica Set -> sit on Deployment   
+
+Master nodes -> Manage the cluster. It consist of the following componenets ->  API Server [kube-apiserver], Distribute Database [etcd], Scheduler [kube-scheduler], Controller Manager [kube-controller-manager]
+Worker nodes -> Manage the application. It consist of the following components -> Node Agent [kubelet], Networing Component [kube-proxy], Container runtime [docker, etc], Pods [mulitple pods running the containers]
+
+```
+
+
+## K8S Commands for reference 
+
+```xml
 <Run all the commands in the google cloud shell>
 
 kubectl -> full form is Kubernetes Controller
@@ -260,9 +278,165 @@ kubectl version
 
 ```
 
+# Steps for creating a K8S cluster on GCP 
+
+## Step 1 - Create a private VPC network 
+```xml
+VPC Network -> Create a VPC network -> 
+Name: test-cluster-01
+Subnets -> Subnet creation mode -> Custom -> Add Subnet 
+New Subnet -> 
+  Name: test-cluster-01
+  Region: asia-south1
+  IP ranges: 10.0.0.0/24 (this will support 2^8 = 256 local ip addresses)
+(leave all others to default)
+click create 
+```
+
+## Step 2 - Create cloud NAT (to authorize services like MongoDB using fixed IP address from ) 
+```xml
+Cloud NAT -> Create Cloud NAT Gateway 
+Gateway Name: test-cluster-01
+Select Cloud Router 
+  Network: test-cluster-01 (previously created VPC Network)
+  Region: asia-south1 (same as the VPC network)
+  Cloud Router: Create New Router 
+    Name: test-cluster-01 
+    (Leave all others to default)
+    Create 
+  Cloud NAT Mapping
+    Cloud NAT IP addresses: Manual 
+    IT Addresses
+      Network Service Tier: Premium 
+        IP address 1 -> Create IP Address
+          Name: test-cluster-01
+          Click Reserve
+(leave all others to default)
+click Create 
+
+Once the NAT is created, click it and go inside to look for the static IP address that will be used by outside cloud services to authenticate the request that originate from this cluster 
+```
+
+## Step 3 - Setting up a kubernetes autopilot cluster on GCP 
+```xml
+Menu -> Kubernetes Engine -> Clusters -> Create 
+Autopilot -> Configure
+Name: test-cluster-01
+Region: asia-south1
+Click Networking 
+
+Network: test-cluster-01 (same VPC network created in step 2)
+Node subnet: test-cluster-01 (same subnet created in step 2)
+IPv4 network access: Private cluster
+Access control plane using its external IP address: This must be ticked 
+
+Add authorized network (to access this cluster)
+New authorized network
+  Name: MyHome
+  Network: 52.39.207.171/32 (eg. IP address of my home)
+
+Next: Advance Settings -> Next: Review and Create -> Create cluster 
+
+```
+
+## Step 4 - Adding firewall rules for outbound ports ourside of the cluster (Eg. Managed MongoDB Atlas)
+```xml
+ --- Nothing to do inside GCP here ---
+Add the external static IP address created in the step 2 into the MongoDB Atlas allowed Network Access List  
+```
+
+
+
+## Step 5 - Build the application and push it to the GCP artifact registry  
+```xml
+1. Go to the project root directory (in my case)
+cd /Users/balaji.thiagarajan/eclipse-workspace/hello-world
+
+2. Maven clean and build the project
+mvn clean install  -DskipTests
+where the pom,xml contains the following configuration parameters
+<groupId>com.balaji.etl</groupId>
+<artifactId>hello-world</artifactId>
+<version>0.0.1-SNAPSHOT</version>
+<name>hello-world</name>
+<description>Demo project for Spring Boot</description>
+<properties>
+  <java.version>17</java.version>
+</properties>
+
+3. Build the docker file to be pushed to the GCP artifact registry (note: not to the docker hub)
+docker build --platform=linux/amd64 -t asia-south1-docker.pkg.dev/balaji-test-343516/hello-world/hello-world:0.0.1-SNAPSHOT .                               
+Note: 
+--platform=linux/amd64 is the target K8S platform where the container must be deployed
+asia-south1-docker.pkg.dev where asia-south1 is where the registry is present 
+balaji-test-343516 is the project id of my GCP project
+hello-world is the docker container name and it must be created first inside the artifact registry 
+hello-world:0.0.1-SNAPSHOT is the container image  
+
+The Dockerfile used for this build is as below: 
+FROM openjdk:17-alpine 
+EXPOSE 8080
+ADD target/hello-world-0.0.1-SNAPSHOT.jar hello-world-0.0.1-SNAPSHOT.jar
+ENTRYPOINT ["java", "-jar", "/hello-world-0.0.1-SNAPSHOT.jar"]
+
+4. Run the docker file locally to check if everything is correct or not 
+docker run -p 8080:8080 --name hello-world hello-world
+
+5. Give access rights for reading and writing into the artifact registry (but create the container folder hello-world first from GCP console)
+gcloud artifacts repositories add-iam-policy-binding hello-world --location=asia-south1 --member=user:<your user id/>  --role="roles/artifactregistry.writer
+or (in case of a service account - advisable)
+gcloud artifacts repositories add-iam-policy-binding ${PROJECT} --member=serviceAccount:${EMAIL} --role=roles/ artifactregistry.writer
+
+6. Authenticte to your gcloud repository for docker 
+gcloud auth configure-docker asia-south1-docker.pkg.dev
+
+7. Push the image to gcloud artifact registry 
+docker push --platform=linux/amd64 asia-south1-docker.pkg.dev/balaji-test-343516/hello-world/hello-world:0.0.1-SNAPSHOT
+
+```
+
+## Step 6 - Deploy the container on the K8S environment 
+```xml
+1. Run this command to install all the tools needs to run kubectl commands from local PC 
+gcloud components install gke-gcloud-auth-plugin 
+
+2. Verify the installation
+gke-gcloud-auth-plugin --version 
+
+3. Connect to cluster (differs for users-project-cluster combination)-> Get this command from your K8S cluster in GCP console 
+gcloud container clusters get-credentials test-cluster-01 --region asia-south1 --project balaji-test-343516
+
+4. Deploy a container 
+kubectl create deployment hello-world --image=asia-south1-docker.pkg.dev/balaji-test-343516/hello-world/hello-world:0.0.1-SNAPSHOT
+
+5.Expose a deployment
+kubectl expose deployment hello-world --type=LoadBalancer --port=8080
+
+6. Check the pods
+kubectl get pods -o wide 
+
+7. Check the services
+kubectl get services
+
+8. Check the logs of the pod (in attached mode) 
+kubectl logs -f <pod-id>
+
+9. Scale deployment
+kubectl scale deployment hello-world --replicas=3 
+
+10. Check replica set
+kubectl get rs 
+
+11. Delete everything related to this pod 
+kubectl delete all -l app=hello-world
+
+```
+
 ## Reference:
 ```xml
 https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/
 https://www.udemy.com/course/devops-with-docker-kubernetes-and-azure-devops/
+https://dchaykin.medium.com/connect-a-gke-cluster-with-mongodb-atlas-through-cloud-nat-b0ffb2683b7d
+https://www.mongodb.com/developer/products/atlas/connect-atlas-cloud-kubernetes-peering/#step-4--deploy-containers-and-test-connectivity
 ```
 
