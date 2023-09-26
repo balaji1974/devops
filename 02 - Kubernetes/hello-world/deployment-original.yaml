@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    autopilot.gke.io/resource-adjustment: '{"input":{"containers":[{"name":"hello-world"}]},"output":{"containers":[{"limits":{"cpu":"500m","ephemeral-storage":"1Gi","memory":"2Gi"},"requests":{"cpu":"500m","ephemeral-storage":"1Gi","memory":"2Gi"},"name":"hello-world"}]},"modified":true}'
+    autopilot.gke.io/warden-version: 2.7.41
+    deployment.kubernetes.io/revision: "1"
+  creationTimestamp: "2023-09-20T10:58:23Z"
+  generation: 2
+  labels:
+    app: hello-world
+  name: hello-world
+  namespace: default
+  resourceVersion: "215000"
+  uid: 5dbb1710-7c79-4977-bd48-7af3929fd6b2
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: hello-world
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: hello-world
+    spec:
+      containers:
+      - image: asia-south1-docker.pkg.dev/ajex-test-343506/hello-world/hello-world:0.0.2-SNAPSHOT
+        imagePullPolicy: IfNotPresent
+        name: hello-world
+        resources:
+          limits:
+            cpu: 500m
+            ephemeral-storage: 1Gi
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            ephemeral-storage: 1Gi
+            memory: 2Gi
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: kubernetes.io/arch
+        operator: Equal
+        value: amd64
+status:
+  availableReplicas: 3
+  conditions:
+  - lastTransitionTime: "2023-09-20T10:58:24Z"
+    lastUpdateTime: "2023-09-20T10:58:27Z"
+    message: ReplicaSet "hello-world-85fdd7b575" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: "2023-09-20T11:01:04Z"
+    lastUpdateTime: "2023-09-20T11:01:04Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  observedGeneration: 2
+  readyReplicas: 3
+  replicas: 3
+  updatedReplicas: 3
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    cloud.google.com/neg: '{"ingress":true}'
+  creationTimestamp: "2023-09-20T10:58:53Z"
+  finalizers:
+  - service.kubernetes.io/load-balancer-cleanup
+  labels:
+    app: hello-world
+  name: hello-world
+  namespace: default
+  resourceVersion: "213753"
+  uid: 6eb3ce8a-a183-4974-b297-1003a5562292
+spec:
+  allocateLoadBalancerNodePorts: true
+  clusterIP: 34.118.238.136
+  clusterIPs:
+  - 34.118.238.136
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - nodePort: 30433
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: hello-world
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer:
+    ingress:
+    - ip: 34.93.110.173

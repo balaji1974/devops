@@ -1,5 +1,6 @@
 # Kubernetes
 
+## K8S Introduction 
 ```xml
 It's a container orchestrator with the following features: Autoscale, Fault tolerant with self healing, Load Balancing, auto deployment, cloud neutral 
 Cluster -> Master Nodes (Manages Cluster) + Worker Nodes (Runs the application) 
@@ -27,8 +28,44 @@ Containers -> reside inside Pod
 Pods -> sit on Replica Set
 Replica Set -> sit on Deployment   
 
-Master nodes -> Manage the cluster. It consist of the following componenets ->  API Server [kube-apiserver], Distribute Database [etcd], Scheduler [kube-scheduler], Controller Manager [kube-controller-manager]
-Worker nodes -> Manage the application. It consist of the following components -> Node Agent [kubelet], Networing Component [kube-proxy], Container runtime [docker, etc], Pods [mulitple pods running the containers]
+Master nodes -> Manage the cluster. It consist of the following componenets ->  
+  API Server [kube-apiserver - all commands from kubectl is submitted to this api server for execution], 
+  Distributed  Database [etcd - stores all the information like pods, deployments, services etc], 
+  Scheduler [kube-scheduler - is resposnsbile for scheduling the pods on to the nodes], 
+  Controller Manager [kube-controller-manager - manages the overall health of the cluster]
+
+Worker nodes -> Manage the application. It consist of the following components -> 
+  Node Agent [kubelet - monitors the node and communicates it to the controller manager], 
+  Networing Component [kube-proxy - helps in exposing services around your nodes and pods], 
+  Container runtime [docker, mesos, swarn etc based on OCI - open container initiative specification], 
+  Pods [mulitple pods running the containers]
+
+kubectl get componentstatuses -> Will display all the components that are running 
+
+```
+
+## Install K8S tools  
+```xml
+Install gcloud
+--------------
+Download and Install gcloud from the below link based on your OS 
+https://cloud.google.com/sdk/docs/install 
+
+Login to gcloud: gcloud auth login 
+
+Install kubectl
+---------------
+Download and install kubectl from the below link based on your OS
+https://kubernetes.io/docs/tasks/tools/
+
+Check the version after installation: kubectl version
+Connect to the cluser with the following command:
+gcloud container clusters get-credentials test-cluster-01 --region asia-south1 --project balaji-test-343516
+where 
+cluster name =test-cluster-01 
+region=asia-south1 
+project id=balaji-test-343516
+(This command can be copied directly from inside your cluster on google cloud console)
 
 ```
 
@@ -280,7 +317,7 @@ kubectl version
 
 # Steps for creating a K8S cluster on GCP 
 
-## Step 1 - Create a private VPC network 
+## Step 1 - Create a private VPC network (to make services like MySQL be on a local private network)
 ```xml
 VPC Network -> Create a VPC network -> 
 Name: test-cluster-01
@@ -391,7 +428,7 @@ gcloud artifacts repositories add-iam-policy-binding ${PROJECT} --member=service
 gcloud auth configure-docker asia-south1-docker.pkg.dev
 
 7. Push the image to gcloud artifact registry 
-docker push --platform=linux/amd64 asia-south1-docker.pkg.dev/balaji-test-343516/hello-world/hello-world:0.0.1-SNAPSHOT
+docker push asia-south1-docker.pkg.dev/balaji-test-343516/hello-world/hello-world:0.0.1-SNAPSHOT
 
 ```
 
@@ -409,7 +446,7 @@ gcloud container clusters get-credentials test-cluster-01 --region asia-south1 -
 4. Deploy a container 
 kubectl create deployment hello-world --image=asia-south1-docker.pkg.dev/balaji-test-343516/hello-world/hello-world:0.0.1-SNAPSHOT
 
-5.Expose a deployment
+5.Expose a deployment - This creates a service with permenant IP address to make the deployment available to the outside world
 kubectl expose deployment hello-world --type=LoadBalancer --port=8080
 
 6. Check the pods
@@ -421,14 +458,148 @@ kubectl get services
 8. Check the logs of the pod (in attached mode) 
 kubectl logs -f <pod-id>
 
-9. Scale deployment
+9. Check everything that has happened to the pod
+kubectl describe pod <pod-id>
+
+10. Scale deployment
 kubectl scale deployment hello-world --replicas=3 
 
-10. Check replica set
-kubectl get rs 
+11. Check replica set (will give the replica set along with the tied image)
+kubectl get rs -o wide 
 
-11. Delete everything related to this pod 
+12. Display details of all elements in the container
+kubectl get all -o wide 
+
+13. Check all the events in k8s by single command (in the order in which they occur)
+kubectl get events --sort-by=.metadata.creationTimestamp 
+
+14. Check the end points by the exposed external ip which can be got from <kubectl get services> command 
+curl --location 'http://<external-ip>:8080/sample/employee'
+
+15. Rolling update to a new version - Attaching a new version of the image to the existing deployment (this will create a new replica set)
+Syntax: kubectl set image deployment <deployment-name> <container-name>=<image-location> --record=true (will record the change cause)
+kubectl set image deployment hello-world hello-world=asia-south1-docker.pkg.dev/balaji-test-343516/hello-world/hello-world:0.0.2-SNAPSHOT --record=true 
+
+16. Check at the rollout history of the deployment 
+kubectl rollout history deployment hello-world
+
+17. Do a rollout to different version 
+kubectl rollout undo deployment hello-world --to-revison=1
+
+18. Copy the deployment and services configuration into an yaml file
+kubectl get deployments hello-world -o yaml > deployment.yaml
+kubectl get services hello-world -o yaml > service.yaml
+
+19. Apply a deployment or service script from your local folder
+kubectl apply -f deployment.yaml 
+kubectl apply -f service.yaml 
+
+20. Create the deployment and service via deployment.yaml file -> 
+Copy both the yaml configurations into a single file and run 
+Sample file contains 2 deployments and 1 service in a single file 
+kubectl apply -f deployment.yaml 
+
+21. Make the existing container wait for few secons until new containers are created 
+Add flag minReadySeconds:<seconds> in the deployment.yaml file and apply
+
+22. To display pods, services, replicaset and deployment in a single command
+kubectl get all
+
+23. Getting stats 
+kubectl top node
+kubectl top pod
+
+24. Entering into a running pod 
+kubectl exec <pod-name> -it -- /bin/sh
+eg. kubectl exec hello-world-v2-76b78f9f7f-zkz2v -it -- /bin/sh
+
+25. Delete everything related to this pod 
 kubectl delete all -l app=hello-world
+
+
+```
+
+## Step 7 - Service discovery and load balancing  
+```xml
+K8S gives service discovery and load balancing for free.
+
+Services can call each other based on the service name that is configured from the following in deployment.yaml file:
+kind: Service
+metadata:
+  name: hello-world
+  
+Load balancing is set in the service configuration as:
+kind: Service
+spec:
+  type: LoadBalancer
+
+```
+
+## Step 8 - Centralized configurations with config maps  
+```xml
+
+Store the below in a configmap.yaml file 
+apiVersion: v1
+data:
+  HELLO_WORLD_SERVICE_HOST: http://hello-world
+kind: ConfigMap
+metadata:
+  name: hello-world-config-map
+  namespace: default
+
+Apply the configmap settings by the below command: 
+kubectl apply -f <file-name> 
+kubectl apply -f configmap.yaml   
+
+Check the config maps in k8S cluster:
+kubectl get configMaps
+
+Check the value of the config map: 
+kubectl describe configmap <config-map-name>
+kubectl describe configmap hello-world-config-map
+
+
+Using the config map in the deloyment.yaml file: 
+spec:
+  template:
+    spec:
+      containers:
+        name: hello-world 
+          env:
+            - name: HELLO_WORLD_SERVICE_HOST
+              # value: http://hello-world -> Instead of directly putting the value, take it from config map 
+              valueFrom: 
+                configMapKeyRef:
+                  key: HELLO_WORLD_SERVICE_HOST
+                  name: hello-world-config-map
+
+```
+## Step 9 - Swtiching load balancers to NodePorts and configuring Ingress 
+```xml
+Load balancers are expensive and to run a load balancer for each service is going to add a lot of overhead
+So we need to switch them to NodePort and configure the Ingress for incoming connections to be routed properly
+1. In the services type: change LoadBalance to NodePort
+2. Next configure an Ingress service as below: 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gateway-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /hello-world/*
+        pathType: Prefix
+        backend:
+          service:
+           name: hello-world
+           port:
+              number: 8080    
+
+3. Save and apply this file (this will take a long time to create - sometimes even upto 15 minutes)
+
 
 ```
 
