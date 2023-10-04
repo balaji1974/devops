@@ -1,16 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0" # minimum version of terraform needed (optional)
-    }
-  }
-}
-
-provider "aws"{
-    region="us-east-1" # region that we need our infrastruce
-}
-
 # plan - execute 
 # first parameter to resource - type of the resource prefixed with the cloud provider name
 # second parameter to resource - internal terraform name given for our bucket
@@ -36,20 +23,3 @@ output "my_s3_bucket_versioning" {
 output "my_s3_bucket_complete_details" {
   value=aws_s3_bucket.my_s3_bucket
 }
-
-#Create IAM User
-resource "aws_iam_user" "my_iam_user" {
-  name = "terraform_iam_user"
-}
-
-/* # Use if for modifying the resource
-#Update IAM User
-resource "aws_iam_user" "my_iam_user" {
-  name = "terraform_iam_user_modified"
-}
-*/
-
-
-
-
-

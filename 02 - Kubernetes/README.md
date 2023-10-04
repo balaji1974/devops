@@ -351,7 +351,7 @@ Select Cloud Router
 (leave all others to default)
 click Create 
 
-Once the NAT is created, click it and go inside to look for the static IP address that will be used by outside cloud services to authenticate the request that originate from this cluster 
+Once the NAT is created, click it and go inside to look for the static IP address that will be used by outside cloud services, like MongoDB or MySQL hosted outside to authenticate the request that originate from this cluster 
 ```
 
 ## Step 3 - Setting up a kubernetes autopilot cluster on GCP 

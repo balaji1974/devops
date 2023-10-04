@@ -1,123 +1,294 @@
 # Terraform
 
+## Infrastructure as Code - Process
 ```xml
-Create a group with AdministratorAccess policy and assign this group to a user with AWS access type Programmatic Access and AWS Management Console Access (real scenario will be a more restricted access). 
+Create Template -> Provision Server -> Install Software -> Configure Software -> Deploy App 
 
-An Access Key ID and  Secret access key is created with the user which has to be stored safely. 
+Create Template -> tools like Packer, Amazon Machine Image (AMI)
+Provision Software -> tools like Terraforms / AWS Cloud Formation 
+Install and Configure Software -> tools like Ansible / Puppet / Chef 
+Deploy App -> tools like Jenkins / Azure DevOps
 
-Download terraform and install it on the PC and make this available from anywhere by adding it to the path variable. 
+```
 
-Check the version:
+## Creating AWS Account 
+```xml
+Create an AWS Free tier account
+https://aws.amazon.com/free/
+
+1. Create a root account 
+2. Create a group called 'Developer' and add 'AdministratorAccess' to this group -> Real world senario we will follow least previlage policy 
+3. Create an user 'test-user-01' 
+4. Provide user access to the AWS Management Console - optional -> Tick 
+5. I want to create an IAM user -> Select 
+6. Custom password -> Enter your password 
+7. Add the group 'Developer' to this user
+8. Login with the newly created user 
+9. If MFA is enabled then it will ask for MFA code 
+10. Set billing alerts 
+
+```
+## Install Terraform  
+```xml
+1. Go to the link below
+https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
+
+2. For MAC you can follow the below steps:
+brew tap hashicorp/tap
+brew install hashicorp/tap/terraform
+brew update
+brew upgrade hashicorp/tap/terraform
+terraform --version -> This is show the latest version of terraform that was installed 
+ 
+```
+
+## Giving access to Terraform on AWS 
+```xml
+
+Got to IAM -> Create a new user 
+
+Create a group with AdministratorAccess policy and assign this group to this user with the below AWS access types:
+Programmatic Access
+
+Also attach existing policy -> AdministratorAccess to this user 
+(real scenario will be a more restricted access)
+
+Once the user is created an Access Key ID and  Secret access key is created with the user which has to be downloaded and stored safely setting it up in our machine. 
+
+To run terraform file we need to first setup 2 environmental variables in our machine (MacOS): 
+export AWS_ACCESS_KEY_ID=<key got from our previous step>
+export AWS_SECRET_ACCESS_KEY=<secret got from our previous step>
+
+or on windows do the following: 
+set AWS_ACCESS_KEY_ID=<key got from our previous step>
+set AWS_SECRET_ACCESS_KEY=<secret got from our previous step>
+```
+
+## Terraform AWS initilization
+
+```xml
+
+(Check the 01-terraform-basics folder for example)
+
+1. Download terraform and install it on the PC and make this available from anywhere by adding it to the path variable. 
+
+2. Check the version:
 terraform version 
 
-Next run the command 
-terraform init 
-(This is needed by terraform for every new project so that it can download all the dependencies) 
-
-Create a file called main.tf and add the following commands to it: 
-
-provider "aws"{
-    region="us-east-1"
-}
+3. All terraform files have the extension 'tf'. Create a file called main.tf 
+Place the below content inside this file, save it as main.tf
 terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 5.0" # minimum version of terraform needed (optional)
     }
   }
 }
 
-Now save and execute this file with the following command: 
-terraform init -> This downloads and initializes the plugins from aws (given as part of provider in the file) needed for further execution by the program
+provider "aws"{
+    region="us-east-1" # region that we need our infrastruce
+}
 
-Amazon Simple Storage Service (Amazon S3) 
-Amazon Elastic Compute Cloud (Amazon EC2) 
+4. Next run the command 
+terraform init 
+This will download all AWS required component of terraform into our working folder. 
+(This is needed by terraform for every new project so that it can download all the provider dependencies - in our case AWS) 
 
-To run terraform file we need to first setup 2 environmental variables: 
-export AWS_ACCESS_KEY_ID=<hidden>
-export AWS_SECRET_ACCESS_KEY=<hidden>
+```
 
+## Creation of S3 bucket resources and enabling versioning
 
-Next in our main.tf file add the following (comments have the : 
+```xml
+Creation of resources in Terraform is a two step process. 
+a. Plan b. Execute
+
+1. Create an S3 bucket 
+
+Create a resouce as below:
 
 # plan - execute 
 # first parameter to resource - type of the resource prefixed with the cloud provider name
 # second parameter to resource - internal terraform name given for our bucket
 resource "aws_s3_bucket" "my_s3_bucket" {
-   # this is the bucket's globally unique name in AWS, note: underscore is invalid in bucket name
+    # this is the bucket's globally unique name in AWS, note: underscore is invalid in bucket name
     bucket = "my-s3-bucket-balaji-test-001"
 }
- 
-Next run the command 
-terraform plan
 
-This will not do anything but will show us the execution plan in the console
+2. terraform plan -> This will show the entire execution plan as to what will happen
 
-Next run the command 
-terraform apply
+3. terraform apply -> This will apply the changes on the S3 bucket by creating the resource with bucket name my-s3-bucket-balaji-test-001
 
-This will execute the file and create the S3 bucket in Amazon S3
-
-Next add the following:
-# this will enable versioning on the resource created
-    versioning {
-        enabled = true
+4. Next in our main.tf file add the following   
+    # this will enable versioning on the resource created
+    resource "aws_s3_bucket_versioning" "versioning_example" {
+      bucket = aws_s3_bucket.my_s3_bucket.id
+      versioning_configuration {
+        status = "Enabled"
+      }
     }
+terraform plan (to store the plan to a file use the command terraform plan -out my_s3_bucket.tfplan)
+terraform apply -> This will create the bucket with revisioning enabled
 
+
+Note: status can be one of the 3-> Enabled, Disabled or Suspended
+While Enable/Suspended can be set anytime, Disabled can be set only during bucket creation time. 
+
+```
+## Terraform State Management 
+
+```xml
 Terraform state management works by comparing the following: Desired state - Known state - Actual state
+Desired state -> Is what we want to achieve 
+Known state -> What is kept hidden in the file called terraform.tfstate
+Actual state -> What is the actual state in the S3 bucket 
 
-Next run the command 
+```
+
+## Terraform Console & Output variables
+
+```xml
 terraform console
 (This will open up the console of terraform) 
 
-Next add the following: 
-# to output value of a variable 
-# output "my_s3_bucket_versioning" is the name of the output 
-# value = is the value of the variable for which we need the output 
+Type:
+aws_s3_bucket.my_s3_bucket
+-> This will show the complete reference configuration of this S3 bucket 
+
+Type: (any tag that was shown from the previous excution result)
+aws_s3_bucket.my_s3_bucket.versioning
+-> This will show the versioning information of this S3 bucket 
+
+Type: (since previois query result is a list we can do the following to get its content based on index)
+aws_s3_bucket.my_s3_bucket.versioning[0]
+-> This will show the versioning information of this S3 bucket 
+
+Add an output variable to terraform file:
 output "my_s3_bucket_versioning" {
-  value = aws_s3_bucket.my_s3_bucket.versioning[0].enabled
+  value=aws_s3_bucket.my_s3_bucket.versioning[0].enabled
+}
+-> This will output the value of aws_s3_bucket.my_s3_bucket.versioning[0].enabled into the output variable my_s3_bucket_versioning
+
+Add anothe variable
+output "my_s3_bucket_complete_details" {
+  value=aws_s3_bucket.my_s3_bucket
 }
 
-Next run the command 
-terraform apply -refresh=false
-(this will not apply the current state with the cloud state and will check only the local copy for changes) 
+To view this execute the command: (come out of the console)
+terraform apply -refresh=false   
+(this will compare the known state locally with the actual state on the cloud without doing the refresh so that we can output only the new variable that was introducted in the previous example)
 
-Next run the command 
-terraform plan -out iam.tfplan
-(this will output the plan to the file name ‘iam.tfplan’)
+```
 
-Now we can use this plan to apply 
-terraform apply "iam.tfplan"
 
-Next add the following:
+## IAM USERS in terraform
+```xml
+Add the below to create an IAM user from terraform 
+
 resource "aws_iam_user" "my_iam_user" {
-  name = "my_iam_user_test"
+  name = "terraform_iam_user"
 }
-This will create an unique user in terraform with a name ‘my_iam_user_test’
 
-Next run the command 
+To output this resource creation into a separate use the command:
+terraform plan -out my_iam_user.tfplan
+
+To run this file for user creation use the below command:
+terraform apply "my_iam_user.tfplan"
+
+To update an IAM user using terraform add the below command in the file:  
+#Update IAM User
+resource "aws_iam_user" "my_iam_user" {
+  name = "terraform_iam_user_modified"
+}
+and run the below command to apply the changes only on the changed resource while not affecting the other parts of the file
+terraform apply -target="aws_iam_user.my_iam_user"
+
+
+```
+
+## Adding tfstate files to .gitignore - **** Important ****
+```xml
+While committing the project to GitHub always add the tfstate files to the .gitignore, as it stores all the secrets in an unencrypted format and hence it is not advisable to push this file to the github repository 
+
+Add the below 3 files to the project's gitignore file
+*.tfstate
+*.tfstate.backup
+.terraform
+
+```
+
+## Refactoring terraform's main.tf file 
+```xml
+(Check the 02-terraform-refraction folder for example)
+You can move outputs into a seperate file, user creation in a seperate file and leave others into the main.tf file.
+Terraform concats all these files and excutes it in one go. 
+
+
+```
+
+## Terraform - Destroy resources
+```xml
 terraform destroy
-(this will remove all the resources that we had created so far, good practise is to destroy resources that we do not need to avoid billing as we can always create it later when we need it) 
+-> this will remove all the resources that we had created so far, good practise is to destroy resources that we do not need to avoid billing as we can always create it later when we need it
+```
 
-# Create multiple users at the same time 
+## More Terraform basics
+
+### Create multiple resources at the same time
+```xml
+(Check the 03-terraform-more-basics folder for example)
+
+Create multiple iam users 
+# plan - execute 
+# Create multiple users at the same time
 resource "aws_iam_user" "my_iam_users" {
     count = 2
-    name = "my_iam_users_${count.index}"
+    name = "my_iam_user_${count.index}"
 }
+where count will loop for 0 and 1 and two users will be created (this is Hashcorp control language)
 
-terraform validate -> This will validate the .tf files
-terraform fmt -> This will format the .tf files
-terraform state -> Will show the current state file 
+```
 
-Next add a variable: 
+### Utlilty commands for the terraform script
+```xml
+terraform validate -> This will validate the script 
+terraform fmt -> This will format the terraform script (and align them correctly)
+terraform show -> Will show the content of the current state file (terraform.tfstate)
+```
+
+### Creation of variables 
+```xml
 variable "my_iam_users_variable" {
+  type= string 
   default = "my_iam_users"
 }
+-> This will create a variable name my_iam_users_variable with value my_iam_users
 
-And we can use it with the following syntax:
-name = "${var.my_iam_users_variable}”
+You can now use the variable anywhere in the terraform script file by refering it as below: 
+${var.my_iam_users_variable}
 
+The valid variable types are:
+any (which is the default if not sepecified), string, number, bool, list, map, set, object, tuple 
+
+You can set the value of the variable in environment variable like below: 
+export TF_VAL_my_iam_users_variable=my_iam_users
+(in this case you can omit the defult flag and the environment value will be applied for this variable or it will override the default value if it is present in the script file with the value set in the environment variable)
+
+Another way of setting values in the variable is to use a file called terrform.tfvars and define the variable values like below in this file: 
+my_iam_users_variable="my_iam_users"
+terraform apply -var-file="any-name.tfvars" will override the file name terrform.tfvars (if you need)
+
+We can also provide values from the command line itself like below:
+terraform plan -refresh=false -var="my_iam_users_variable=my_iam_users"
+
+The order of priority for the value is a below: 
+first from the command line, from the variable file terrform.tfvars, from environment variable value, and finally from within the scrip file 
+
+```
+
+### List & Map
+```xml
+(Check the 04-lists-and-sets folder for example)
 Add a list:
 variable "names" {
   default = ["bala", "havisha", "haasya", "krithika"]
@@ -129,6 +300,12 @@ resource "aws_iam_user" "my_iam_users" {
   name  = var.names[count.index]
 }
 
+Functions like reverse, distint, sort can be used with collection var.names 
+concat(var.name, ["dada"]) -> This will add new values to the list
+contains(var.name, ["bala"]) -> Will return true or false based on the value, if it exist or not 
+
+range(start index, end index, steps) -> eg. range(1,12,2) will list values 1, 3, 5, 7, 8 and 11 
+
 Another way to iterate a list is by converting it to a set:
 resource "aws_iam_user" "my_iam_users" {
    for_each=toset(var.names)  
@@ -136,6 +313,7 @@ resource "aws_iam_user" "my_iam_users" {
 }
 Here the index for the resource is the name of the user itself instead of number based index in the previous way where we used var.names[count.index]
 
+(Check the 05-maps folder for example)
 Add a map: 
 variable "users" {
   default = {
@@ -174,6 +352,12 @@ resource "aws_iam_user" "my_iam_users" {
     department: each.value.department
   }  
 }
+
+```
+
+```xml
+
+
 
 EC2 Instances: 
 Region: me-south-1 (N Virginia) 
