@@ -141,8 +141,10 @@ While Enable/Suspended can be set anytime, Disabled can be set only during bucke
 Terraform state management works by comparing the following: Desired state - Known state - Actual state
 Desired state -> Is what we want to achieve 
 Known state -> What is kept hidden in the file called terraform.tfstate
-Actual state -> What is the actual state in the S3 bucket 
+Actual state -> What is the actual state in the cloud
 
+Purpose for having Terraform state
+https://developer.hashicorp.com/terraform/language/state/purpose
 ```
 
 ## Terraform Console & Output variables
@@ -306,6 +308,9 @@ contains(var.name, ["bala"]) -> Will return true or false based on the value, if
 
 range(start index, end index, steps) -> eg. range(1,12,2) will list values 1, 3, 5, 7, 8 and 11 
 
+The problem with list is that if one element is added in between, then all the subsequent elements must be removed first and added as the index changes. This is not advisable and so we need something else for storage of elements that keep changing.
+To set method is the answer to this, as it uses the index key as the value itself instead of number and so even if we insert a list value inbetween, the other values will not be affected (will not be deleted and created again)
+
 Another way to iterate a list is by converting it to a set:
 resource "aws_iam_user" "my_iam_users" {
    for_each=toset(var.names)  
@@ -352,6 +357,12 @@ resource "aws_iam_user" "my_iam_users" {
     department: each.value.department
   }  
 }
+
+```
+### Create an EC2 instance 
+```xml
+
+
 
 ```
 
