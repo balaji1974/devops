@@ -359,27 +359,23 @@ resource "aws_iam_user" "my_iam_users" {
 }
 
 ```
+
 ### Create an EC2 instance 
 ```xml
+Step 1
+From the EC2 Instances launch panel copy the following (as per your requirement): 
+Region: me-south-1 - Middle East (Bahrain)
+Amazon Machine Image: ami-0c68df699c2b2009a - Amazon Linux 2023 AMI 2023.2.20231002.0 x86_64 HVM kernel-6.1
+Instance Type: t3.micro
+VPC : vpc-2c05f545 (use default for now)
 
 
+Step 2
+Create a new security group: (which will allow http port - 80, ssh port - 22 and CIDR block to allow access from anywhere CIDR["0.0.0.0/0"])
 
-```
-
-```xml
-
-
-
-EC2 Instances: 
-Region: me-south-1 (N Virginia) 
-Amazon Machine Image: ami-0aeeebd8d2ab47354
-Instance Type: t2.micro
-VPC : vpc-6e76e613
-
-Create a new security group: 
-resource "aws_security_group" "http_server_sg" {
-  name   = "http_server_sg"
-  vpc_id = "vpc-6e76e613"
+resource "aws_security_group" "http_server_secgroup" {
+  name   = "http_server_secgroup"
+  vpc_id = "vpc-2c05f545"
 
   ingress = [
     {
@@ -419,37 +415,61 @@ resource "aws_security_group" "http_server_sg" {
   }]
 
   tags = {
-    name = "http_server_sg"
+    name = "http_server_secgroup"
   }
 
 }
+For more functionality refer to the below link:
+https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
+The newly created security group can be viewed under EC2 -> Security Groups.
+Copy the security group id from here to be used in Step 4. 
 
-Next create a default key-pair in “aws / ec2 / network and security / key pairs” and get it downloaded. Change permission by setting chmod 400 for this file and move it to a secure location on your PC. This will be used to create the EC2 instances. 
+Step 3
+Next create a default key-pair in “aws / ec2 / network and security / key pairs” and get it downloaded. 
+Move the file to a standard folder: ~/aws/aws-keys (not necessary but this is kind of standard)
+Change permission by setting chmod 400 for this file 
+Eg. chmod 400 <name of the file>.pem -> chmod 400 test-ec2-creation-key.pem
+This will be used to create the EC2 instances. 
 
+Step 4
 Now Create a new EC2 instance: 
 resource "aws_instance" "my_ec2_http_server" {
-  ami = "ami-0aeeebd8d2ab47354"
-  key_name = "my-default-ec2-keypair"
-  instance_type = "t2.micro"
-  security_groups = [aws_security_group.http_server_sg.id]
-  subnet_id = "subnet-c5591be4"
+  ami = "ami-0c68df699c2b2009a"
+  key_name = "test-ec2-creation-key"
+  instance_type = "t3.micro"
+  security_groups = [aws_security_group.http_server_secgroup.id]
+  subnet_id = "subnet-4c04f425"
 }
+aws_security_group.http_server_secgroup.id -> Note the id in the last to denote the id field
+subnet-4c04f425 -> This is the subnet created inside the VPC for me-south-1-a
 
-Connect to the EC2 instance that was created: 
+Step 5
+terraform apply -> This will create the instance 
+```
+
+### Connecting and running commands on EC2 instance 
+```xml
+
+Step 1
+Connect to the EC2 instance that was created in the step 3 of the previous section: 
 # create variable with the path to the key pair that was downloaded 
 variable "ec2_key_pair" {
-  default="~/aws/aws_keys/my-default-ec2-keypair.pem"
+  default="~/aws/aws-keys/test-ec2-creation-key.pem"
 }
+
+Step 2
 Add the following inside the resource block 
 # connect to the instance 
 connection {
   type= "ssh"
   host = self.public_ip
-  user = "ec2-user" # default user 
+  user = "ec2-user" # default user that will be created automatically when an EC2 instance is created 
   private_key=file(var.ec2_key_pair)
 }
 
+Step 3
 Next create a http server, start it and create index.html file under this server by creating the below block of code inside the resource block 
+Add this also inside the resource block 
 provisioner "remote-exec" {
     inline = [
       "sudo yum install httpd -y",  # install the http server 
@@ -459,45 +479,82 @@ provisioner "remote-exec" {
   }
 
 Note: Once the resource is created the above commands will not take effect as instances are immutable. So if the resources are created already we need to destroy it first before we can add the above blocks in a single go. 
+But in the newer terraform versions the instance is automatically destroyed first and is recreated. 
 
-Making things dynamic (note-> apply -target was not working for me and hence I was using apply only)
+Step 4 
+Check the server 
+http://<public_ip> or http://<public_dns_of_the_server>
+Eg. http://ec2-157-175-175-68.me-south-1.compute.amazonaws.com/
 
-To get the default vpc we can add this to our main.tf file and 
+```
+
+### Making things dynamic
+```xml
+Step 1 - Making VPC dynamic
+To get the default vpc we can add this to our main.tf file  
 resource "aws_default_vpc" "default" {
 }
 then run the following command 
 terraform apply -target=aws_default_vpc.default 
-Next it can be used by adding the following line in our file: 
-vpc_id= aws_default_vpc.default.id
 
+Now instead of hard coding the the vpc_id we can use this default VPC id. 
+resource "aws_security_group" "http_server_secgroup" {
+  name   = "http_server_secgroup"
+  vpc_id = aws_default_vpc.default.id
+  .........all other lines remain the same.........
+}
+https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_vpc
+
+Step 2 - Making subnet dynamic
 To get the subnet dynamically we can add this to our main.tf file and 
-data "aws_subnet_ids" "default_subnets" {
-  vpc_id= aws_default_vpc.default.id
+data "aws_subnets" "default_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [aws_default_vpc.default.id]
+  }
 }
 then run the following command 
-terraform apply -target=aws_subnet_ids.default_subnets 
+terraform apply -target=data.aws_subnets.default_subnets 
+
 Next it can be used by adding the following line in our file: 
-subnet_id= tolist(data.aws_subnet_ids.default_subnets.ids)[3] # where index is where our original subnet that we used in the file is present
+subnet_id = data.aws_subnets.default_subnets.ids[2] # where index is where our original subnet that we used in the file is present
 
-
-To get the ami dynamically we can add this to our main.tf file and 
+Step 3 - Making AMI dynamic
+To get the ami dynamically we can add this to our main.tf file. 
+The value to be used can be got from the ami we have used by checking in the aws EC2 instance that was created  
 data "aws_ami" "aws-linux-2-latest" {
   most_recent = true
   owners = ["amazon"]
   filter {
-    name="name"
-    values =["amzn2-ami-hvm-*"]
+    name = "name"
+    values = ["al2023-ami-2023.2.20231002.0-kernel-6.1*"]
+  }
+   
+  filter {
+    name = "architecture"
+    values = ["x86_64"]
   }
 }
 
-data "aws_ami_ids" "aws-linux-2-latest_ids" {
-  owners = ["amazon"]
-}
-then run the following commands 
-terraform apply -target=aws_ami_ids.aws-linux-2-latest_ids
 terraform apply -target=aws_ami.aws-linux-2-latest
 Next it can be used by adding the following line in our file: 
 ami = data.aws_ami.aws-linux-2-latest.id
+
+```
+
+### Best pratices for creating terraform EC2 instance 
+```xml
+If the configuration changes, provision a new server, and then destroy the old server, rather than making teaks to the exisitng configuations. 
+
+This is a best practise for modifying running instances as recommended by terraform. 
+```
+
+```xml
+
+
+
+
+
 
 terraform graph 
 This command will give a graph format of what is happening which can be applied in the online website https://dreampuf.github.io/GraphvizOnline to view the output
