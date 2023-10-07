@@ -547,17 +547,26 @@ ami = data.aws_ami.aws-linux-2-latest.id
 If the configuration changes, provision a new server, and then destroy the old server, rather than making teaks to the exisitng configuations. 
 
 This is a best practise for modifying running instances as recommended by terraform. 
+
+Create all variables (variables.tf) and data providers (data-providers.tf) into their own files
+Then run the following command
+terraform fmt 
+terraform apply -refresh=false
+
+```
+
+### Other commands  
+```xml
+1. Terraform graph 
+terraform graph 
+This command will give a graph format of what is happening which can be applied in the online website https://dreampuf.github.io/GraphvizOnline to view the output
+
+2. Terraform destroy
+terraform destroy -> To remove all resources before moving to the next section 
+
 ```
 
 ```xml
-
-
-
-
-
-
-terraform graph 
-This command will give a graph format of what is happening which can be applied in the online website https://dreampuf.github.io/GraphvizOnline to view the output
 
 To create multiple instances of the EC2 servers: 
 for_each = data.aws_subnet_ids.default_subnets.ids
