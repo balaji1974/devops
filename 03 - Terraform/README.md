@@ -567,69 +567,75 @@ terraform destroy -> To remove all resources before moving to the next section
 
 ```
 
-### Creating multiple EC2 instances   
+### Creating multiple EC2 instances 
 ```xml
 (Check the 07-ec2-with-elb folder for example)
+Copy the 3 files (main.tf, variables.tf and data-providers.tf) into this folder 
+Then run the command 
+terraform init
 
+Step 1
+Make few code changes in main.tf: 
+resource "aws_instance" "my_ec2_http_servers" {
+  #ami = "ami-0c68df699c2b2009a"
+  ami             = data.aws_ami.aws-linux-2-latest.id
+  key_name        = "test-ec2-creation-key"
+  instance_type   = "t3.micro"
+  security_groups = [aws_security_group.http_server_secgroup.id]
+  #subnet_id = "subnet-4c04f425"
+  #subnet_id = data.aws_subnets.default_subnets.ids[2]
+  for_each  = toset(data.aws_subnets.default_subnets.ids)
+  subnet_id = each.value
+  
+  tags = {
+    name: "http_servers_${each.value}"
+  }
+-> This will create multiple EC2 instances in each of the subnets 
+
+Step 2
+Make changes in output.tf 
+output "http_server_public_dns" {
+  value = aws_instance.my_ec2_http_servers.*.public_dns
+}
+
+Step 3 
+If you run "terraform apply" here an error will appear like 
+"data.aws_subnets.default_subnets.ids is a list of string, known only after apply"
+To overcome this, run the command 
+terraform apply -target=data.aws_subnets.default_subnets 
+which will fetch all the subnets first and then we can apply. 
+
+If you run "terraform apply" another error will still appear like 
+"value = aws_instance.my_ec2_http_servers.*.public_dns
+│ 
+│ This object does not have an attribute named "public_dns"
+To overcome this, in the output.tf file change the below line like:
+output "http_server_public_dns" {
+  value = aws_instance.my_ec2_http_servers
+}
+
+Now run "terraform apply" and 3 EC2 instances will be created in each of the zones. 
 
 ```
-
-
+### Adding Elastic load balancer for multiple instances that are running
 ```xml
+Step 1
 
-To create multiple instances of the EC2 servers: 
-for_each = data.aws_subnet_ids.default_subnets.ids
-subnet_id       = each.value
-The above 2 lines must replace the subnet id that was present originally 
+Change the name = "elb_secgroup" and remove the tags section. The resource "aws_security_group" "http_server_secgroup" will look like below: 
 
-Next run 
-terraform apply -target=data.aws_subnet_ids.default_subnets
-to initialize the subnet ids 
-
-And finally run the 
-terraform apply
-
-
-To create a load balancer:
-# security group for load balancer 
-resource "aws_security_group" "elb_sg" {
-  name   = "elb_sg"
-  
-  vpc_id= aws_default_vpc.default.id
-
-  ingress = [
-    {
-      cidr_blocks      = ["0.0.0.0/0"]
-      description      = "tcp"
-      from_port        = 80
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      protocol         = "tcp"
-      security_groups  = []
-      self             = false
-      to_port          = 80
-    }
-  ]
-
-  egress = [{
-    cidr_blocks      = ["0.0.0.0/0"]
-    description      = "outbound"
-    from_port        = 0
-    ipv6_cidr_blocks = []
-    prefix_list_ids  = []
-    protocol         = -1
-    security_groups  = []
-    self             = false
-    to_port          = 0
-  }]
+resource "aws_security_group" "elb_secgroup" {
+  name = "elb_secgroup"
+  .......... (all other lines remain the same)
 
 }
 
+Step 2
+Create a resource for load balancer
 #create a load balancer resource
 resource "aws_elb" "elb" {
   name = "elb"
-  subnets = data.aws_subnet_ids.default_subnets.ids
-  security_groups = [aws_security_group.elb_sg.id]
+  subnets = toset(data.aws_subnets.default_subnets.ids)
+  security_groups = [aws_security_group.elb_secgroup.id]
   instances = values(aws_instance.my_ec2_http_servers).*.id
   listener {
     instance_port = 80
@@ -639,7 +645,25 @@ resource "aws_elb" "elb" {
   }
 }
 
-Now use terraform apply and it will give out a load balancer url which can be accessed after a few minutes. In my case it was http://elb-1724272591.us-east-1.elb.amazonaws.com/ 
+Step 3
+In the output.tf file add the following:
+output "elb_public_dns" {
+  value = aws_elb.elb
+}
+
+
+Step 4
+terraform validate
+terraform apply
+
+Step 5
+From the output look for the value in the variable elb_public_dns and get the dns_name.
+Copy it and run it in the browser 
+In my case it was http://elb-1187672536.me-south-1.elb.amazonaws.com/ 
+(please note it will take atleast 5 to 10 minutes for the load balancer to come up. So wait patiently)
+```
+
+```xml
 
 This is the configuration to create DynamoDB 
 #Configuration for DynamoDB

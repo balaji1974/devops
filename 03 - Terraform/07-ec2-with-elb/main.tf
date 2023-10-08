@@ -14,8 +14,8 @@ terraform {
 resource "aws_default_vpc" "default" {
 }
 
-resource "aws_security_group" "http_server_secgroup" {
-  name = "http_server_secgroup"
+resource "aws_security_group" "elb_secgroup" {
+  name = "elb_secgroup"
   # vpc_id = "vpc-2c05f545" #instead of hardcoding use the below
   vpc_id = aws_default_vpc.default.id
 
@@ -44,32 +44,49 @@ resource "aws_security_group" "http_server_secgroup" {
     }
   ]
 
-  egress = [{
-    cidr_blocks      = ["0.0.0.0/0"]
-    description      = "outbound"
-    from_port        = 0
-    ipv6_cidr_blocks = []
-    prefix_list_ids  = []
-    protocol         = -1
-    security_groups  = []
-    self             = false
-    to_port          = 0
-  }]
-
-  tags = {
-    name = "http_server_secgroup"
-  }
+  egress = [
+    {
+      cidr_blocks      = ["0.0.0.0/0"]
+      description      = "outbound"
+      from_port        = 0
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      protocol         = -1
+      security_groups  = []
+      self             = false
+      to_port          = 0
+    }
+  ]
 
 }
 
-resource "aws_instance" "my_ec2_http_server" {
+resource "aws_elb" "elb" {
+  name = "elb"
+  subnets = toset(data.aws_subnets.default_subnets.ids)
+  security_groups = [aws_security_group.elb_secgroup.id]
+  instances = values(aws_instance.my_ec2_http_servers).*.id
+  listener {
+    instance_port = 80
+    instance_protocol = "http"
+    lb_port=80 
+    lb_protocol="http"
+  }
+}
+
+resource "aws_instance" "my_ec2_http_servers" {
   #ami = "ami-0c68df699c2b2009a"
   ami             = data.aws_ami.aws-linux-2-latest.id
   key_name        = "test-ec2-creation-key"
   instance_type   = "t3.micro"
-  security_groups = [aws_security_group.http_server_secgroup.id]
+  security_groups = [aws_security_group.elb_secgroup.id]
   #subnet_id = "subnet-4c04f425"
-  subnet_id = data.aws_subnets.default_subnets.ids[2]
+  #subnet_id = data.aws_subnets.default_subnets.ids[2]
+  for_each  = toset(data.aws_subnets.default_subnets.ids)
+  subnet_id = each.value
+  
+  tags = {
+    name: "http_servers_${each.value}"
+  }
 
   connection {
     type        = "ssh"
