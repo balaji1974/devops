@@ -362,6 +362,7 @@ resource "aws_iam_user" "my_iam_users" {
 
 ### Create an EC2 instance 
 ```xml
+(Check the 06-ec2-instances folder for example)
 Step 1
 From the EC2 Instances launch panel copy the following (as per your requirement): 
 Region: me-south-1 - Middle East (Bahrain)
@@ -565,6 +566,14 @@ This command will give a graph format of what is happening which can be applied 
 terraform destroy -> To remove all resources before moving to the next section 
 
 ```
+
+### Creating multiple EC2 instances   
+```xml
+(Check the 07-ec2-with-elb folder for example)
+
+
+```
+
 
 ```xml
 

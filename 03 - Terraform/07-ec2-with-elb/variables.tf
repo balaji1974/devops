@@ -1,3 +1,3 @@
 variable "ec2_key_pair" {
-  default = "~/aws/aws_keys/my-default-ec2-keypair.pem"
+  default = "~/aws/aws_keys/test-ec2-creation-key.pem"
 }
