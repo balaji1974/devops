@@ -777,20 +777,9 @@ terraform workspace list
 -> This would list all the workspaces that are present 
 ```
 
-### Modules - Working with modules
+### Modules - Working with modules (alternative to workspace - more safe approach)
 ```xml
 (please refer to the sample in folder 10-modules)
-Local vs Global variables:
-variable "environment" {
-   default ="default"
- }
--> This is a global variable
-
-locals {
-  iam_user_extension="my_iam_user_balaji"
-}
--> This is a local variable 
-
 
 To set the module value that we need to set the following in terraform-module folder:
 variable "environment" {
@@ -801,17 +790,31 @@ resource "aws_iam_user" "my_iam_user" {
   name="${var.environment}_my_iam_user"
 }
 
-To set modules to dev or qa folder use the following:
+To set modules to dev or qa folder use the following inside the dev/qa user folder main.tf file:
 module "user_module" {
   source = "../../terraform-modules/users"
   environment = "dev"
 }
+This will set the environment and use the source file under terraform-modules/user folder
 
-and run :
+Run the folling in both dev/user and qa/user folders:
 terraform init
 terraform apply
 
 Using a modular approach is best in terraform and a sample is given in the project 09-modules
+
+
+Additional tips: 
+Local vs Global variables:
+variable "environment" {
+   default ="default"
+ }
+-> This is a global variable
+
+locals {
+  iam_user_extension="my_iam_user_balaji"
+}
+-> This is a local variable 
 
 ```
 
