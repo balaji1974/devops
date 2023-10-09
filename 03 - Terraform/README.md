@@ -617,6 +617,7 @@ output "http_server_public_dns" {
 Now run "terraform apply" and 3 EC2 instances will be created in each of the zones. 
 
 ```
+
 ### Adding Elastic load balancer for multiple instances that are running
 ```xml
 Step 1
@@ -663,9 +664,72 @@ In my case it was http://elb-1187672536.me-south-1.elb.amazonaws.com/
 (please note it will take atleast 5 to 10 minutes for the load balancer to come up. So wait patiently)
 ```
 
+### Storing remote state 
 ```xml
+(Check the 08-backend-state folder for example)
+Step 1 
+Create main.tf file with one user 
+provider "aws" {
+  region = "me-south-1"
+}
 
-This is the configuration to create DynamoDB 
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0" # minimum version of terraform needed (optional)
+    }
+  }
+}
+
+resource "aws_iam_user" "my_iam_user" {
+  name = "my_iam_user"
+}
+
+Step 2
+Create an output.tf file to display the user
+output "my_iam_user_complete_details" {
+  value = aws_iam_user.my_iam_user
+}
+
+Step 3
+Go the directory of these 2 files and do the following:
+terrafrom init 
+terraform apply
+After this step, one user called my_iam_user will be created
+
+Step 4 
+Move everything to 'user' folder and run the below command
+terraform apply -refresh=false
+
+Step 5
+Create another folder called 'backend-state' in the project home directory 
+Go to this folder
+
+Step 6 
+Create an AWS Bucket
+resource "aws_s3_bucket" "enterprise_backend_state" {
+    bucket = "dev-applications-backend-state-balaji-test"
+ 
+    lifecycle {
+        prevent_destroy = true
+    }
+ 
+    versioning {
+        enabled = true
+    }
+
+    server_side_encryption_configuration {
+        rule {
+            apply_server_side_encryption_by_default {
+                sse_algorithm = "AES256"
+            }
+        }
+    }
+}
+
+Step 7 
+Create a lock configuration for DynamoDB 
 #Configuration for DynamoDB
 resource "aws_dynamodb_table" "my_backend_lock" {
   name = "dev_application_locks"
@@ -677,23 +741,29 @@ resource "aws_dynamodb_table" "my_backend_lock" {
   }
 }
 
+Step 8 
 This will copy the application state information to the DynamoDB so that it is not needed for us to maintain it locally and we can delete our local copy. Also since lock is applied before writing the state information centrally, multiple users can now work on the same project safely.
 terraform {
     backend "s3" {
-    bucket = "my-dev-backend-state"
+    bucket = "dev-applications-backend-state-balaji-test"
     # key signifies an environment, project name, application name and key name
-    key = "dev/07-backend-state/users/backend-state"
-    region = "us-east-1"
+    key = "dev/08-backend-state/users/backend-state"
+    region = "me-south-1"
     dynamodb_table = "dev_application_locks"
     encrypt = true
   }
 }
 
+```
+
+### Workspace - Creating multiple enviroments 
+```xml
+(please refer to the sample in folder 09-modules)
 terraform workspace show
-Will show the default workspace of the project
+-> Will show the default workspace of the project
 
 terraform workspace new prod-env
-This will initialize the project once more and shift it to a new workspace called prod-env
+-> This will initialize the project once more and shift it to a new workspace called prod-env
 
 If we use the same project to create the user again after the moving to a new workspace the user creation would fail since it is still using the default workspace to create the user. Hence the resource for creating the user can be changed now to:
 resource "aws_iam_user" "my_iam_user" {
@@ -701,25 +771,26 @@ resource "aws_iam_user" "my_iam_user" {
 }
 
 terraform workspace select default 
-This will change the workspace back to the default workspace 
+-> This will change the workspace back to the default workspace 
 terraform workspace list
-This would list all the workspaces that are present 
+-> This would list all the workspaces that are present 
 
 Local vs Global variables:
-This is a global variable
 variable "environment" {
    default ="default"
  }
-This is a local variable 
+-> This is a global variable
+
 locals {
   iam_user_extension="my_iam_user_balaji"
 }
+-> This is a local variable 
 
-Using a modular approach is best in terraform and a sample is given in the project 08-modules
+Using a modular approach is best in terraform and a sample is given in the project 09-modules
 
-References:
+```
+
+### References:
 https://www.udemy.com/course/devops-with-docker-kubernetes-and-azure-devops/
 https://www.terraform.io/docs/index.html
 
-
-```

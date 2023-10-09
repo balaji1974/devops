@@ -2,15 +2,15 @@
    default ="default"
  }
 
-provider "aws"{
-    region="us-east-1"
+provider "aws" {
+  region = "me-south-1"
 }
 
 terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 5.0" # minimum version of terraform needed (optional)
     }
   }
 }
