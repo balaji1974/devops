@@ -756,9 +756,9 @@ terraform {
 
 ```
 
-### Workspace & Modules - Creating multiple enviroments and working with modules
+### Workspace - Creating multiple enviroments
 ```xml
-(please refer to the sample in folder 09-modules)
+(please refer to the sample in folder 09-workspace)
 terraform workspace show
 -> Will show the default workspace of the project
 
@@ -767,14 +767,19 @@ terraform workspace new prod-env
 
 If we use the same project to create the user again after the moving to a new workspace the user creation would fail since it is still using the default workspace to create the user. Hence the resource for creating the user can be changed now to:
 resource "aws_iam_user" "my_iam_user" {
-  name = "${terraform.workspace}-my_iam_user_balaji"
+  name = "${terraform.workspace}-my_iam_user"
 }
 
 terraform workspace select default 
 -> This will change the workspace back to the default workspace 
+
 terraform workspace list
 -> This would list all the workspaces that are present 
+```
 
+### Modules - Working with modules
+```xml
+(please refer to the sample in folder 10-modules)
 Local vs Global variables:
 variable "environment" {
    default ="default"
