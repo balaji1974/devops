@@ -5,16 +5,17 @@
    Automation.  
    Quick Feedback.  
 
-## Agile -> (Brings business and development teams together and immediate feedback is given at the end of each sprint)
+## Agile 
+  (Brings business and development teams together and immediate feedback is given at the end of each sprint)
   Involves business teams and development teams   
   Quick Feedback.   
   Continuous Integration.     
 
-## Microservices -> 
+## Microservices 
 As they evolved Operations team had a big role to play.   
 DevOps evolved.   
 
-## DevOps -> 
+## DevOps 
   Enhance communication between Development & Operations teams.  
   Continuous Deployment (deploy new version of software continuously).  
   Continuous Delivery (deploy software into production continuously).     
