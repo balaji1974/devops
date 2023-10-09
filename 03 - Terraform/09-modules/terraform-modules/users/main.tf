@@ -1,6 +1,6 @@
- variable "environment" {
-   default ="default"
- }
+variable "environment" {
+  default ="default"
+}
 
 provider "aws" {
   region = "me-south-1"
@@ -15,6 +15,10 @@ terraform {
   }
 }
 
+resource "aws_iam_user" "my_iam_user" {
+  name="${var.environment}_${local.iam_user_extension}"
+}
+
 locals {
-  iam_user_extension="my_iam_user_balaji"
+  iam_user_extension="my_iam_user_test"
 }

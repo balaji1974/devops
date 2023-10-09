@@ -756,7 +756,7 @@ terraform {
 
 ```
 
-### Workspace - Creating multiple enviroments 
+### Workspace & Modules - Creating multiple enviroments and working with modules
 ```xml
 (please refer to the sample in folder 09-modules)
 terraform workspace show
@@ -785,6 +785,26 @@ locals {
   iam_user_extension="my_iam_user_balaji"
 }
 -> This is a local variable 
+
+
+To set the module value that we need to set the following in terraform-module folder:
+variable "environment" {
+  default ="dev"
+}
+and to use this do the following: 
+resource "aws_iam_user" "my_iam_user" {
+  name="${var.environment}_my_iam_user"
+}
+
+To set modules to dev or qa folder use the following:
+module "user_module" {
+  source = "../../terraform-modules/users"
+  environment = "dev"
+}
+
+and run :
+terraform init
+terraform apply
 
 Using a modular approach is best in terraform and a sample is given in the project 09-modules
 
