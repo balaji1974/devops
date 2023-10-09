@@ -791,6 +791,8 @@ Using a modular approach is best in terraform and a sample is given in the proje
 ```
 
 ### References:
+```xml
 https://www.udemy.com/course/devops-with-docker-kubernetes-and-azure-devops/
 https://www.terraform.io/docs/index.html
+```
 
