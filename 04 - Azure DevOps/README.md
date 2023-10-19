@@ -15,6 +15,18 @@ First thing is create a budget under subscription so that you can be alerted on 
 
 ```
 
+### Install Azure client on your PC (needed later)
+```xml
+brew update && brew install azure-cli
+
+Check version:
+az --version
+
+Login: 
+az login
+
+```
+
 ### Azure DevOps - Initial Setup 
 ```xml
 Search for Azure DevOps Services -> Go the page and click on "Start Free"
@@ -545,9 +557,9 @@ https://learn.microsoft.com/en-us/azure/devops/pipelines/release/variables?view=
 
 ```
 
-### 
+### Azure DevOps, Azure K8S Service (AKS) & Terraforms 
 ```xml
-
+To be completed
 ```
 
 
