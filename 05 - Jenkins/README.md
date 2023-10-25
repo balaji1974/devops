@@ -76,7 +76,7 @@ Manage Jenkins -> Clouds -> Install a plugin -> Docker -> Install it
 2. Next from the browser go to http://localhost:8080 -> this is the page where Jenkins is running from the previous step
 3. Manage Jenkins -> Tools ->  Maven installation -> 
 	Add Maven -> Name: JenkinsMaven -> Install automatically (ticked) -> Save 
-	Add Docker -> Docker: JenkinsDocker -> Install automatically (ticked) -> Save 
+	Add Docker -> Docker: JenkinsDocker -> Install automatically (ticked) -> Download from docker.com -> Docker version: latest -> Save  
 
 ```
 
@@ -220,6 +220,170 @@ pipeline {
 -> This will pull the docker image (maven), run it and we can excute commands (mvn --version) against the run image
 
 ```
+
+### Pipeline syntax & Environment Variables
+```xml
+Select your pipeline -> Pipeline Syntax ->  You can generate sample scripts here for no. of Jenkins processes
+Select your pipeline -> Pipeline Syntax ->  Global Variable Reference -> Here you will have lots of global variables for your reference 
+Eg. $PATH, $env.BUILD_NUMBER, $env.BUILD_ID etc
+
+pipeline {
+	agent any
+	stages {
+		stage('Build') {
+			steps {
+				echo "Build"
+				echo "Path - $PATH"
+				echo "Build Number - $env.BUILD_NUMBER"
+				echo "Build ID - $env.BUILD_ID"
+				echo "Job Name - $env.JOB_NAME"
+				echo "Build Tag - $env.BUILD_TAG"
+				echo "Build URL - $env.BUILD_URL"
+			}
+		}
+		stage('Test') {
+			steps {
+				echo "Test"
+			}
+		}
+		stage('Integeration') {
+			steps {
+				echo "Integeration Test"
+			}
+		}
+	}
+	post {
+		always {
+			echo "I have completed"
+		}
+		success {
+			echo "I run when successful"
+		}
+		failure {
+			echo "I run when I failed"
+		}
+	}
+}
+```
+
+### Using the Maven & Docker that was added in our initial step
+```xml
+In our initial step we had added the below:
+Manage Jenkins -> Tools ->  Maven installation -> 
+	Add Maven -> Name: JenkinsMaven -> Install automatically (ticked) -> Save 
+	Add Docker -> Docker: JenkinsDocker -> Install automatically (ticked) -> Download from docker.com -> Docker version: latest -> Save 
+
+To use them:
+pipeline {
+	agent any
+	environment {
+		dockerHome= tool 'JenkinsDocker'
+		mavenHome=tool 'JenkinsMaven'
+		PATH="$dockerHome/bin:$mavenHome/bin:$PATH"
+	}
+	stages {
+		stage('Build') {
+			steps {
+				sh 'mvn --version'
+				sh 'docker version'
+				echo "Build"
+				echo "Path : - $PATH"
+				echo "Build Number - $env.BUILD_NUMBER"
+				echo "Build ID - $env.BUILD_ID"
+				echo "Job Name - $env.JOB_NAME"
+				echo "Build Tag - $env.BUILD_TAG"
+				echo "Build URL - $env.BUILD_URL"
+			}
+		}
+		stage('Test') {
+			steps {
+				echo "Test"
+			}
+		}
+		stage('Integeration') {
+			steps {
+				echo "Integeration Test"
+			}
+		}
+	}
+	post {
+		always {
+			echo "I have completed"
+		}
+		success {
+			echo "I run when successful"
+		}
+		failure {
+			echo "I run when I failed"
+		}
+	}
+}
+
+```
+
+### Running Unit and Integration Test
+```xml
+For integration testing we will add cucumber testing later 
+Refer from the URL: 
+https://www.baeldung.com/cucumber-spring-integration
+and adding failsafe plugin from here: 
+https://www.baeldung.com/maven-failsafe-plugin
+
+# This part only covers unit testing
+pipeline {
+	agent any
+	environment {
+		dockerHome= tool 'JenkinsDocker'
+		mavenHome=tool 'JenkinsMaven'
+		PATH="$dockerHome/bin:$mavenHome/bin:$PATH"
+	}
+	stages {
+		stage('Checkout') {
+			steps {
+				sh 'mvn --version'
+				sh 'docker version'
+				echo "Build"
+				echo "Path : - $PATH"
+				echo "Build Number - $env.BUILD_NUMBER"
+				echo "Build ID - $env.BUILD_ID"
+				echo "Job Name - $env.JOB_NAME"
+				echo "Build Tag - $env.BUILD_TAG"
+				echo "Build URL - $env.BUILD_URL"
+			}
+		}
+		stage('Build') {
+			steps {
+				sh 'mvn clean compile'
+				
+			}
+		}
+		stage('Test') {
+			steps {
+				sh 'mvn test'
+			}
+		}
+		stage('Integeration') {
+			steps {
+				echo "Integeration Test"
+				echo "Add cucumber integration test later"
+			}
+		}
+	}
+	post {
+		always {
+			echo "I have completed"
+		}
+		success {
+			echo "I run when successful"
+		}
+		failure {
+			echo "I run when I failed"
+		}
+	}
+}
+```
+
+
 
 ### 
 ```xml
