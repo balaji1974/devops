@@ -64,11 +64,84 @@ terraform destroy -> Do not forget to run this step or else you might be charged
 
 ```
 
+### Ansible setup and running commands
+```xml
+Create the 3 instances of server using terrform script (check the section above)
+
+In the ansible.cfg file add the following:
+[defaults]
+inventory=./ansible_hosts -> this refers to the file where the list of instances details are present
+remote_user=ec2-user -> this is the remote ec2 machine user (by default created for all servers)
+private_key_file=~/aws/aws_keys/test-ec2-creation-key.pem (this is the private key that we got for connecting to EC2 instances in the beginning of this tutorial)
+host_key_checking=False -> we dont need any host key checking
+retry_files_enabled=False -> we will not do any file retries
+
+In the ansible_host file add the following: 
+[dev]
+157.175.168.64 -> the external ip address of server1
+15.184.154.14 -> the external ip address of server2
+15.184.133.191 -> the external ip address of server3
+
+Next run the ping command below to check if everything is fine: 
+ansible -m ping all -> this must give a SUCCESS message for all the external IP addresses
+ansible all -a "whoami" -> this will run the command whoami in all the servers 
+ansible all -a "uname" -> will return the operating system's uname
+ansible all -a "uname -a" -> will return more details of the OS uname
+ansible all -a "pwd" -> will display the present working directory of all machines
+ansible all -a "python --version" -> will display the python version from all machines (will show error if not installed)
+
+
+interpreter_python=auto_silent -> This in the ansible.cfg file will turn off all python warnings
+
+For ssh into the linux server that was created use the below command:
+ssh -vvv -i <aws-keyfile.pem> <aws-user>@<machine-ip-address>
+eg. 
+ssh -vvv -i ~/aws/aws_keys/test-ec2-creation-key.pem ec2-user@157.175.43.216
+```
+
+### Ansible host file and custom groups
+```xml
+In the ansible_hosts file use the following:
+[dev]
+dev1 ansible_host=157.175.43.216
+dev2 ansible_host=16.24.24.4
+qa1 ansible_host=15.185.34.92
+
+This will name the host machine with dev1, dev2 and qa1 instead of the ip address to display
+
+The below would group the servers in dev and qa
+[dev]
+dev1 ansible_host=157.175.43.216
+dev2 ansible_host=16.24.24.4
+[qa]
+qa1 ansible_host=15.185.34.92
+
+Now based on it we run commands on a specific group
+ansible dev -a "uname -a"
+
+We can also create virtual mixed groups like below:
+[first]
+dev1
+qa1
+
+Now based on it we can run commands on this virtual group
+ansible first -a "uname -a"
+
+The below will create a group from existing group
+[groupofgroups:children]
+dev
+first
+
+The below is a group with is a subset of dev1 until dev5 servers
+[devsubset]
+dev[1:5]
+
+```
+
 ### 
 ```xml
 
 ```
-
 
 ### 
 ```xml
