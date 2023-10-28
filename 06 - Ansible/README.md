@@ -188,7 +188,7 @@ ansible-playbook playbooks/02-shell.yaml
 
 ### Variables
 ```xml
-create a file 03-variables.yaml inside the playbooks folder 
+create a file 03-variables.yaml inside the playbooks folder and copy the below: 
 ---
 - hosts: dev
   vars_files:
@@ -205,6 +205,32 @@ ansible-playbook playbooks/03-variables.yaml
 ansible-playbook playbooks/03-variables.yaml -e variable1=CommadlineValue -> this will override variable1 with anything that is passed as value from command line
 
 ```
+### Ansible Facts (from gathering facts step)
+```xml
+create a file 04-ansible-facts.yaml inside the playbooks folder and copy the below: 
+
+---
+- hosts: qa
+  tasks:
+    - name: Kernel
+      debug: msg="{{ ansible_kernel }}" -> kernal of the OS
+    - name: Hostname
+      debug: msg="{{ ansible_hostname }}" -> host name of the remote machine
+    - name: Distribution
+      debug: msg="{{ ansible_distribution }}" -> distribution name (like amazon, azure etc)
+    - debug: var=ansible_architecture -> will display architecture of the host (eg. x86_64)
+    - debug: var=inventory_hostname -> prints the inventory host name
+    - debug: var=groups -> prints the available groups
+    - debug: var=group_names -> prints all the current group names where the host is present 
+    - debug: var=hostvars -> prints all the information of all the servers
+
+run the file created by the below command
+ansible-playbook playbooks/04-ansible-facts.yaml
+
+ansible qa -m setup -> this will display all the facts that are gathered 
+
+```
+
 ### 
 ```xml
 
