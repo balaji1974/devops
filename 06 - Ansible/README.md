@@ -101,6 +101,7 @@ ssh -vvv -i ~/aws/aws_keys/test-ec2-creation-key.pem ec2-user@157.175.43.216
 
 ### Ansible host file and custom groups
 ```xml
+(Ansible host file is also called the inventory)
 In the ansible_hosts file use the following:
 [dev]
 dev1 ansible_host=157.175.43.216
@@ -138,6 +139,72 @@ dev[1:5]
 
 ```
 
+### Ansible commands
+```xml
+ansible --list-host all -> Will list all the machines
+ansible --list-host dev -> Will list all machines in the group dev
+ansible --list-host \!first -> Will list all machines not in the group first
+ansible --list-host qa:dev -> Will list a combination of machines in qa and dev
+
+```
+
+### Intro to Playbook
+```xml
+(the below is called a play and it has multiple tasks)
+create a file 01-ping.yaml inside the playbooks folder 
+Now, the first task that will be performed automatically is [Gathering Facts] and it is added as and automatic task (first task) before all the tasks that we define. 
+
+---
+- hosts: all -> where the task must execute, this is our first play 
+  tasks:
+    - name: Ping All Servers -> name of the task to run 
+      action: ping -> task to perform 
+    - debug: msg="Hello" -> this is the 2nd task to perform 
+- hosts: dev -> this is our second play 
+  tasks:
+    - debug: msg="Hello Dev" 
+
+run the file created by the below command
+ansible-playbook playbooks/01-ping.yaml
+```
+
+### Execute shell commands
+```xml
+create a file 02-shell.yaml inside the playbooks folder 
+---
+- hosts: qa -> Run on qa group
+  tasks:
+    - name: Execute Shell Commands -> name of the task
+      shell: uname -> shell command to execute
+      register: uname_result -> register the output of the shell command under uname_result
+    - debug: msg="{{ uname_result}}" -> print the output variable uname_result
+    - debug: msg="{{ uname_result.stdout }}" -> print the output variable uname_result's array stdout
+    - debug: msg="{{ uname_result.stdout_lines}}" -> print the output variable uname_result's array stdout_lines
+
+run the file created by the below command
+ansible-playbook playbooks/02-shell.yaml
+
+```
+
+### Variables
+```xml
+create a file 03-variables.yaml inside the playbooks folder 
+---
+- hosts: dev
+  vars_files:
+    - variables.yml -> this overrides any local variable present (like the one below)
+  vars:
+    variable1: "PlayBookValue" -> variable definition
+  tasks:
+    - name: Variable Value
+      debug: msg="Value is {{ variable1 }}" -> printing the variable1 
+
+run the file created by the below command
+ansible-playbook playbooks/03-variables.yaml
+
+ansible-playbook playbooks/03-variables.yaml -e variable1=CommadlineValue -> this will override variable1 with anything that is passed as value from command line
+
+```
 ### 
 ```xml
 
