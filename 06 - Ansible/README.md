@@ -274,6 +274,43 @@ ansible-playbook playbooks/06-playbooks.yaml --list-tags -> This will list the t
 
 ### Handling loops and conditions
 ```xml
+create file 07-conditions-and-loops inside the playbooks folder and copy the below into it: 
+
+---
+- hosts: qa -> We will run our commands against the qa host 
+  vars:
+    system: "Linux" -> This defines the var name 'system' with default value as 'Linux'
+    color: "Red" -> This defines the var name 'color' with default value as 'Red'
+  tasks:
+#    - debug: var=hostvars
+    - debug: var=ansible_system -> This will give us the OS name and print it in debug 
+    - debug: var=color -> This will get the variable color and print it in debug if it matches the condition below 
+      when: system == 'Linux' -> If the condition system='Linux' matches the above statement is printed 
+    - debug: var=item -> This will loop with value of item from the below values 
+      with_items: -> The list of below values will be looped for the item variable above
+      - item1
+      - item2
+      - item3
+      - item4
+    - debug: var=item -> Same as above but an array of values can be passed into the variable for looping
+      with_items:
+      - name: Balaji
+        country: India
+      - name: Krithika
+        country: US
+      - name: Havi&Haas
+        country: Netherlands
+    - debug: var=item.name -> Same as above but a particular value from the array of values can be printed, in our case only the name from the item variable
+      with_items:
+      - name: Balaji
+        country: India
+      - name: Krithika
+        country: US
+      - name: Havi&Haas
+        country: Netherlands
+        
+run the file created by the below command
+ansible-playbook playbooks/07-conditions-and-loops.yaml
 
 ```
 
