@@ -231,7 +231,48 @@ ansible qa -m setup -> this will display all the facts that are gathered
 
 ```
 
-### 
+### Installing Apache and adding HTML file to it
+```xml
+create a file 05-install-apache.yaml inside the playbooks folder and copy the below: 
+
+---
+- hosts: dev -> group where we need to install 
+  become: true -> this is equivalant to sudo (so we become root user for installation)
+  tasks:
+    - yum: ->this is the task 
+        name:
+          - httpd -> name of the task
+        state: present 
+    - service: name=httpd state=started enabled=yes -> we want to run this task as a service
+    - raw: "echo Welcome to MyWorld | sudo tee /var/www/html/index.html" -> create html and store it inside the apache folder
+
+run the file created by the below command
+ansible-playbook playbooks/05-install-apache.yaml
+
+Check if everything went well by opening the browser and running:
+http://<ip_address>
+
+```
+
+### Create and execute multiple playbooks
+```xml
+create file 06-playbooks.yaml inside the playbooks folder and copy the below into it: 
+
+- import_playbook: 01-ping.yaml
+- import_playbook: 02-shell.yaml
+- import_playbook: 03-variables.yaml
+
+run the file created by the below command
+ansible-playbook playbooks/06-playbooks.yaml
+
+ansible-playbook playbooks/06-playbooks.yaml --list-tasks -> This will list the tasks of all the playbooks
+ansible-playbook playbooks/06-playbooks.yaml --list-hosts -> This will list the host of all the playbooks
+ansible-playbook -l qa playbooks/01-ping.yaml -> This will list the host from a playbook only on a particular group (in our case qa)
+ansible-playbook playbooks/06-playbooks.yaml --list-tags -> This will list the tags on all the playbooks
+
+```
+
+### Handling loops and conditions
 ```xml
 
 ```
