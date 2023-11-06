@@ -365,8 +365,39 @@ ansible-inventory --graph -> this will give a grouping of all the inventories pr
 
 ```
 
-### 
+### Provisioning EC2 instances
 ```xml
+create file 09-create-ec2.yaml inside the playbooks folder and copy the below into it: 
+
+---
+- hosts: localhost
+  tasks:
+    - ec2_instance:
+        key_name: test-ec2-creation-key -> key pair from ec2 instances -> Network & Security-> Keypair 
+        instance_type: t3.micro -> instance type
+        image_id: ami-0f8d2a6080634ee69 -> image type to use
+        region: me-south-1 -> region
+        #count: 1
+        exact_count: 2 -> no. of instances to create
+        filters:
+          "tag:type": http -> tag the instance
+        vpc_subnet_id: subnet-4c04f425 -> subnet id (can take from existing instance)
+        network:
+          assign_public_ip: true -> to assign public ip address
+        security_groups: ["http_server_secgroup"] -> ec2 instances -> Network & Security-> Security Groups -> take the one that exist
+        tags: {type: http, Environment: QA} -> tags to create 
+        wait: yes -> wait for server to be created
+      register: ec2_output -> register the result to a variable 
+    - debug: var=ec2_output -> print the resulting variable 
+
+run the file created by the below command
+ansible-playbook playbooks/09-create-ec2.yaml
+
+```
+
+###  
+```xml
+
 
 ```
 
