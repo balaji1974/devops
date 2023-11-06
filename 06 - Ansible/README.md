@@ -50,8 +50,8 @@ Inside the resouce {} section add the line count=3 -> This will be the no. of se
 Also remove the connection {} and  provisioner "remote-exec" {} section fully as we will use Ansible later for this configuration
 
 Now before running the terraform commands run the following from the command prompt:
-AWS_ACCESS_KEY_ID=<Your access key>
-AWS_SECRET_ACCESS_KEY=<Your secret access key>
+export AWS_ACCESS_KEY_ID=<Your access key>
+export AWS_SECRET_ACCESS_KEY=<Your secret access key>
 
 Next run the below commands:
 terraform init
@@ -282,7 +282,6 @@ create file 07-conditions-and-loops inside the playbooks folder and copy the bel
     system: "Linux" -> This defines the var name 'system' with default value as 'Linux'
     color: "Red" -> This defines the var name 'color' with default value as 'Red'
   tasks:
-#    - debug: var=hostvars
     - debug: var=ansible_system -> This will give us the OS name and print it in debug 
     - debug: var=color -> This will get the variable color and print it in debug if it matches the condition below 
       when: system == 'Linux' -> If the condition system='Linux' matches the above statement is printed 
@@ -308,9 +307,61 @@ create file 07-conditions-and-loops inside the playbooks folder and copy the bel
         country: US
       - name: Havi&Haas
         country: Netherlands
-        
+
 run the file created by the below command
 ansible-playbook playbooks/07-conditions-and-loops.yaml
+
+```
+
+### Dynamic Inventory
+```xml
+1. Install the latest version of python from:
+https://www.python.org/downloads/
+
+2. Make alias of python with our installed version and check the version of python: (in my case) 
+alias python=python3
+python --version
+
+3. Install PIP - Download get-pip.py from the below website:
+https://pip.pypa.io/en/stable/installation/
+
+4. Run the download file: 
+python get-pip.py
+
+5. Check the version of pip: 
+pip --version
+
+6. Install boto3
+python -m pip install boto3
+
+7. Get into python and import boto3
+python
+>>> import boto3
+
+8. In the ansible.cfg change the inventory file location as below: 
+inventory=inventory/aws_ec2.yaml
+
+create file aws_ec2.yaml inside the inventory folder and copy the below into it: 
+
+plugin: aws_ec2
+regions:
+  - me-south-1
+keyed_groups:
+  - prefix: arch -> group by architecture
+    key: 'architecture'
+  - prefix: tag -> group by tag
+    key: 'tags'
+  - prefix: aws_region -> group by region
+    key: placement.region
+  - key: tags.Environment -> group by tag named environment
+    separator: ''
+  - key: instance_type 
+    prefix: instance_type -> group by instance type
+
+run the file created by the below command
+ansible-inventory --list 
+
+ansible-inventory --graph -> this will give a grouping of all the inventories present based on instances, architecture, region and instance type 
 
 ```
 
