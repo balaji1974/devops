@@ -378,7 +378,7 @@ create file 09-create-ec2.yaml inside the playbooks folder and copy the below in
         image_id: ami-0f8d2a6080634ee69 -> image type to use
         region: me-south-1 -> region
         #count: 1
-        exact_count: 2 -> no. of instances to create
+        exact_count: 2 -> no. of instances to create (otherwise count will create new instance everytime you run the script)
         filters:
           "tag:type": http -> tag the instance
         vpc_subnet_id: subnet-4c04f425 -> subnet id (can take from existing instance)
