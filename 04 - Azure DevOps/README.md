@@ -557,8 +557,16 @@ https://learn.microsoft.com/en-us/azure/devops/pipelines/release/variables?view=
 
 ```
 
-### Azure DevOps, Azure K8S Service (AKS) & Terraforms 
+## Azure DevOps, Azure K8S Service (AKS) & Terraforms 
 ```xml
+To be completed
+```
+
+## Azure DevOps Boards and Backlogs 
+```xml
+Azure DevOps Demo Generator
+https://azuredevopsdemogenerator.azurewebsites.net/
+
 To be completed
 ```
 
